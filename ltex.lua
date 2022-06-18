@@ -2,41 +2,7 @@ local inspect = require("inspect")
 local lnsep = "\n==========\n"
 local function println(arg) print(lnsep .. arg .. lnsep) end
 
--- addToDictionary command captured from LSP Code action.
-local command = {}
-command.dictionary = {
-    arguments = { {
-        uri = "file:///home/leonardo/.config/nvim/lua/test/latex/main.tex",
-        words = {
-            ["en-US"] = { "Error", "Warning" },
-        }
-    } },
-    command = "_ltex.addToDictionary",
-    title = "Add 'Errorr' to dictionary"
-}
-
-command.disableRules = {
-  arguments = { {
-      ruleIds = {
-        ["en-US"] = { "MORFOLOGIK_RULE_ES", "INCORRECT_SPACES" }
-      },
-      uri = "file:///home/leonardo/develop/ltex-lua/readme.md"
-    } },
-  command = "_ltex.disableRules",
-  title = "Disable rule"
-}
-
-command.hideFalsePositives = {
-  arguments = { {
-      falsePositives = {
-        ["en-US"] = { '{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\\\Qerror with false positive.\\\\E$"}', 
-                      '{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\\\Qerror with false positive.\\\\E$"}' }
-      },
-      uri = "file:///home/leonardo/develop/ltex-lua/readme.md"
-    } },
-  command = "_ltex.hideFalsePositives",
-  title = "Hide false positive"
-}
+local commands = require("commands")
 
 -- Command Handler mockup.
 local function execute_command(command)
@@ -95,6 +61,6 @@ local function hideFalsePositives(command)
 end
 
 -- execute_command(command.dictionary)
-addToDictionary(command.dictionary)
-disableRules(command.disableRules)
-hideFalsePositives(command.hideFalsePositives)
+addToDictionary(commands.dictionary)
+disableRules(commands.disableRules)
+hideFalsePositives(commands.hideFalsePositives)
