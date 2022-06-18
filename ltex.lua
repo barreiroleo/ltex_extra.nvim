@@ -29,6 +29,9 @@ local function addToDictionary(command)
     for lang, words in pairs(args) do
         println("Lang: " .. inspect(lang) .. "\n" ..
                 "Words: " .. inspect(words))
+        for _, word in ipairs(words) do
+            print(word)
+        end
     end
 end
 
