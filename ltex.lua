@@ -29,9 +29,13 @@ local function addToDictionary(command)
     for lang, words in pairs(args) do
         println("Lang: " .. inspect(lang) .. "\n" ..
                 "Words: " .. inspect(words))
+        local file = io.open("ltex.dictionary." .. lang .. ".txt", "a+")
+        io.output(file)
         for _, word in ipairs(words) do
             print(word)
+            io.write(word .. "\n")
         end
+        io.close(file)
     end
 end
 
