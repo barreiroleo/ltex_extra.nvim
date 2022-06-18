@@ -3,7 +3,8 @@ local lnsep = "\n==========\n"
 local function println(arg) print(lnsep .. arg .. lnsep) end
 
 -- addToDictionary command captured from LSP Code action.
-local command = {
+local command = {}
+command.dictionary = {
     arguments = { {
         uri = "file:///home/leonardo/.config/nvim/lua/test/latex/main.tex",
         words = {
@@ -14,6 +15,16 @@ local command = {
     title = "Add 'Errorr' to dictionary"
 }
 
+command.disableRules = {
+  arguments = { {
+      ruleIds = {
+        ["en-US"] = { "UPPERCASE_SENTENCE_START" }
+      },
+      uri = "file:///home/leonardo/develop/ltex-lua/readme.md"
+    } },
+  command = "_ltex.disableRules",
+  title = "Disable rule"
+}
 
 -- Command Handler mockup.
 local function execute_command(command)
@@ -39,5 +50,5 @@ local function addToDictionary(command)
     end
 end
 
-execute_command(command)
-addToDictionary(command)
+execute_command(command.dictionary)
+addToDictionary(command.dictionary)
