@@ -18,7 +18,7 @@ command.dictionary = {
 command.disableRules = {
   arguments = { {
       ruleIds = {
-        ["en-US"] = { "UPPERCASE_SENTENCE_START" }
+        ["en-US"] = { "MORFOLOGIK_RULE_ES", "INCORRECT_SPACES" }
       },
       uri = "file:///home/leonardo/develop/ltex-lua/readme.md"
     } },
@@ -50,5 +50,22 @@ local function addToDictionary(command)
     end
 end
 
-execute_command(command.dictionary)
+local function disableRules(command)
+    local args = command.arguments[1].ruleIds
+    println(inspect(args))
+    for lang, rules in pairs(args) do
+        println("Lang: " .. inspect(lang) .. "\n" ..
+                "Rules: " .. inspect(rules))
+        local file = io.open("ltex.disabledRules." .. lang .. ".txt", "a+")
+        io.output(file)
+        for _, rule in ipairs(rules) do
+            print(rule)
+            io.write(rule .. "\n")
+        end
+        io.close(file)
+    end
+end
+
+-- execute_command(command.dictionary)
 addToDictionary(command.dictionary)
+disableRules(command.disableRules)
