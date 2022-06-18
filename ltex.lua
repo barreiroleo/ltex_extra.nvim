@@ -26,6 +26,18 @@ command.disableRules = {
   title = "Disable rule"
 }
 
+command.hideFalsePositives = {
+  arguments = { {
+      falsePositives = {
+        ["en-US"] = { '{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\\\Qerror with false positive.\\\\E$"}', 
+                      '{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\\\Qerror with false positive.\\\\E$"}' }
+      },
+      uri = "file:///home/leonardo/develop/ltex-lua/readme.md"
+    } },
+  command = "_ltex.hideFalsePositives",
+  title = "Hide false positive"
+}
+
 -- Command Handler mockup.
 local function execute_command(command)
     println(inspect(command))
@@ -66,6 +78,23 @@ local function disableRules(command)
     end
 end
 
+local function hideFalsePositives(command)
+    local args = command.arguments[1].falsePositives
+    println(inspect(args))
+    for lang, rules in pairs(args) do
+        println("Lang: " .. inspect(lang) .. "\n" ..
+                "Rules: " .. inspect(rules))
+        local file = io.open("ltex.hiddenFalsePositives." .. lang .. ".txt", "a+")
+        io.output(file)
+        for _, rule in ipairs(rules) do
+            print(rule)
+            io.write(rule .. "\n")
+        end
+        io.close(file)
+    end
+end
+
 -- execute_command(command.dictionary)
 addToDictionary(command.dictionary)
 disableRules(command.disableRules)
+hideFalsePositives(command.hideFalsePositives)
