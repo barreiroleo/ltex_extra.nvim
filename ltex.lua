@@ -1,6 +1,6 @@
 local inspect = require("inspect")
 local lnsep = "\n==========\n"
-local function println(arg) print(lnsep .. arg) end
+local function println(arg) print(lnsep .. arg .. lnsep) end
 
 -- addToDictionary command captured from LSP Code action.
 local command = {
@@ -23,5 +23,14 @@ local function execute_command(command)
     end
 end
 
+local function addToDictionary(command)
+    local args = command.arguments[1].words
+    println(inspect(args))
+    for lang, words in pairs(args) do
+        println("Lang: " .. inspect(lang) .. "\n" ..
+                "Words: " .. inspect(words))
+    end
+end
 
 execute_command(command)
+addToDictionary(command)
