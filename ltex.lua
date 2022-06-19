@@ -13,6 +13,21 @@ local function writeFile(type, lang, lines)
     io.close(file)
 end
 
+local function readFile(type, lang)
+    type = (type .. ".") or ""
+    lang = (lang .. ".") or ""
+    local filename = ("ltex." .. type .. lang .. "txt")
+
+    local lines = {}
+    local file = io.open(filename, "r")
+    io.input(file)
+    for line in io.lines(filename) do
+        lines[#lines+1] = line
+    end
+    io.close(file)
+    return lines
+end
+
 local function addToDictionary(command)
     local args = command.arguments[1].words
     for lang, words in pairs(args) do
@@ -53,3 +68,11 @@ end
 execute_command(commands.dictionary)
 execute_command(commands.disableRules)
 execute_command(commands.hideFalsePositives)
+
+println("Reading file")
+local dictionary = readFile("dictionary", "en-US")
+local disabledRules = readFile("disabledRules", "en-US")
+local hiddenFalsePositives = readFile("hiddenFalsePositives", "en-US")
+print(inspect(dictionary))
+print(inspect(disabledRules))
+print(inspect(hiddenFalsePositives))
