@@ -4,45 +4,36 @@ local function println(arg) print("\n" .. lnsep .. arg .. lnsep) end
 
 local commands = require("commands")
 
+local function writeFile(type, lang, lines)
+    local file = io.open("ltex." .. type .. "." .. lang .. ".txt", "a+")
+    io.output(file)
+    for _, line in ipairs(lines) do
+        io.write(line .. "\n")
+    end
+    io.close(file)
+end
+
 local function addToDictionary(command)
     local args = command.arguments[1].words
     for lang, words in pairs(args) do
-        print("Lang: " .. inspect(lang) .. "\n" ..
-            "Words: " .. inspect(words))
-        local file = io.open("ltex.dictionary." .. lang .. ".txt", "a+")
-        io.output(file)
-        for _, word in ipairs(words) do
-            io.write(word .. "\n")
-        end
-        io.close(file)
+        print("Lang: " .. inspect(lang) .. "\n" .. "Words: " .. inspect(words))
+        writeFile("dictionary", lang, words)
     end
 end
 
 local function disableRules(command)
     local args = command.arguments[1].ruleIds
     for lang, rules in pairs(args) do
-        print("Lang: " .. inspect(lang) .. "\n" ..
-            "Rules: " .. inspect(rules))
-        local file = io.open("ltex.disabledRules." .. lang .. ".txt", "a+")
-        io.output(file)
-        for _, rule in ipairs(rules) do
-            io.write(rule .. "\n")
-        end
-        io.close(file)
+        print("Lang: " .. inspect(lang) .. "\n" .. "Rules: " .. inspect(rules))
+        writeFile("disabledRules", lang, rules)
     end
 end
 
 local function hideFalsePositives(command)
     local args = command.arguments[1].falsePositives
     for lang, rules in pairs(args) do
-        print("Lang: " .. inspect(lang) .. "\n" ..
-            "Rules: " .. inspect(rules))
-        local file = io.open("ltex.hiddenFalsePositives." .. lang .. ".txt", "a+")
-        io.output(file)
-        for _, rule in ipairs(rules) do
-            io.write(rule .. "\n")
-        end
-        io.close(file)
+        print("Lang: " .. inspect(lang) .. "\n" .. "Rules: " .. inspect(rules))
+        writeFile("hiddenFalsePositives", lang, rules)
     end
 end
 
