@@ -1,6 +1,6 @@
 -- Commands captured from LSP Code action.
-
 local commands = {}
+
 commands.dictionary = {
     arguments = { {
         uri = "file:///home/leonardo/.config/nvim/lua/test/latex/main.tex",
