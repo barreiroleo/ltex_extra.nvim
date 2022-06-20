@@ -4,29 +4,9 @@ local function println(arg) print("\n" .. lnsep .. arg .. lnsep) end
 
 local commands = require("commands")
 
-local function writeFile(type, lang, lines)
-    local file = io.open("ltex." .. type .. "." .. lang .. ".txt", "a+")
-    io.output(file)
-    for _, line in ipairs(lines) do
-        io.write(line .. "\n")
-    end
-    io.close(file)
-end
-
-local function readFile(type, lang)
-    type = (type .. ".") or ""
-    lang = (lang .. ".") or ""
-    local filename = ("ltex." .. type .. lang .. "txt")
-
-    local lines = {}
-    local file = io.open(filename, "r")
-    io.input(file)
-    for line in io.lines(filename) do
-        lines[#lines+1] = line
-    end
-    io.close(file)
-    return lines
-end
+local filesystem = require("filesystem")
+local writeFile = filesystem.writeFile
+local readFile = filesystem.readFile
 
 local function addToDictionary(command)
     local args = command.arguments[1].words
