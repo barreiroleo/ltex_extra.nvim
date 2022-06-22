@@ -30,7 +30,7 @@ M.readFile = function(type, lang)
         end
         io.close(file)
     end
-    return table.concat({"[", lang, "] = ", M.inspect(lines)})
+    return lines
 end
 
 M.inspect = function(args)

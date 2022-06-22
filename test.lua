@@ -2,14 +2,14 @@ local inspect = require("inspect")
 local lnsep = "=========="
 local function println(arg) print("\n" .. lnsep .. arg .. lnsep) end
 
-local commands           = require("commands")
-local addToDictionary    = require("commands-lsp").addToDictionary
-local disableRules       = require("commands-lsp").disableRules
-local hideFalsePositives = require("commands-lsp").hideFalsePositives
+local commands           = require("test.commands")
+local addToDictionary    = require("src.commands-lsp").addToDictionary
+local disableRules       = require("src.commands-lsp").disableRules
+local hideFalsePositives = require("src.commands-lsp").hideFalsePositives
 
-local inspect   = require("utils").inspect
-local writeFile = require("utils").writeFile
-local readFile  = require("utils").readFile
+local inspect            = require("src.utils").inspect
+local writeFile          = require("src.utils").writeFile
+local readFile           = require("src.utils").readFile
 
 local langs = {"es-AR", "en-US"}
 
@@ -31,11 +31,17 @@ execute_command(commands.disableRules)
 execute_command(commands.hideFalsePositives)
 
 println("Reading file")
+local dictionary           = {}
+local disabledRules        = {}
+local hiddenFalsePositives = {}
 for _, lang in ipairs(langs) do
-    local dictionary           = readFile("dictionary", lang)
-    local disabledRules        = readFile("disabledRules", lang)
-    local hiddenFalsePositives = readFile("hiddenFalsePositives", lang)
-    print(dictionary)
-    print(disabledRules)
-    print(hiddenFalsePositives)
+    dictionary[lang]           = readFile("dictionary", lang)
+    disabledRules[lang]        = readFile("disabledRules", lang)
+    hiddenFalsePositives[lang] = readFile("hiddenFalsePositives", lang)
 end
+print(inspect(dictionary))
+print(inspect(disabledRules))
+print(inspect(hiddenFalsePositives))
+
+local dictionary_example = {["es-AR"] = {"Errorr"}, ["en-US"] = {"Errorr"}}
+print(inspect(dictionary_example))
