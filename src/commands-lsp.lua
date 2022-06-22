@@ -1,8 +1,7 @@
 local folderPath = (...):match("(.-)[^%.]+$") -- returns 'lib.foo.'
--- local inspect = require("inspect")   -- from luarocks.
-local inspect = vim.inspect
 local debug = false
 
+local inspect    = require(folderPath .. "utils").inspect
 local filesystem = require(folderPath .. "utils")
 local writeFile = filesystem.writeFile
 local readFile = filesystem.readFile
