@@ -1,9 +1,9 @@
 -- local pathOfThisFile = ... -- pathOfThisFile is now 'lib.foo.bar'
 local folderPath = (...):match("(.-)[^%.]+$") -- returns 'lib.foo.'
 
-local addToDictionary    = require(folderPath .. "commands-lsp").addToDictionary
-local disableRules       = require(folderPath .. "commands-lsp").disableRules
-local hideFalsePositives = require(folderPath .. "commands-lsp").hideFalsePositives
+local addToDictionary    = require(folderPath .. "src.commands-lsp").addToDictionary
+local disableRules       = require(folderPath .. "src.commands-lsp").disableRules
+local hideFalsePositives = require(folderPath .. "src.commands-lsp").hideFalsePositives
 
 
 local orig_execute_command = vim.lsp.buf.execute_command
