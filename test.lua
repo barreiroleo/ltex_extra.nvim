@@ -7,9 +7,11 @@ local addToDictionary    = require("commands-lsp").addToDictionary
 local disableRules       = require("commands-lsp").disableRules
 local hideFalsePositives = require("commands-lsp").hideFalsePositives
 
-local filesystem = require("filesystem")
-local writeFile  = filesystem.writeFile
-local readFile   = filesystem.readFile
+local inspect   = require("utils").inspect
+local writeFile = require("utils").writeFile
+local readFile  = require("utils").readFile
+
+local langs = {"es-AR", "en-US"}
 
 -- Command Handler mockup.
 local function execute_command(command)
@@ -29,9 +31,11 @@ execute_command(commands.disableRules)
 execute_command(commands.hideFalsePositives)
 
 println("Reading file")
-local dictionary           = readFile("dictionary", "en-US")
-local disabledRules        = readFile("disabledRules", "en-US")
-local hiddenFalsePositives = readFile("hiddenFalsePositives", "en-US")
-print(inspect(dictionary))
-print(inspect(disabledRules))
-print(inspect(hiddenFalsePositives))
+for _, lang in ipairs(langs) do
+    local dictionary           = readFile("dictionary", lang)
+    local disabledRules        = readFile("disabledRules", lang)
+    local hiddenFalsePositives = readFile("hiddenFalsePositives", lang)
+    print(dictionary)
+    print(disabledRules)
+    print(hiddenFalsePositives)
+end

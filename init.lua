@@ -19,3 +19,20 @@ vim.lsp.buf.execute_command = function(command)
       orig_execute_command(command)
     end
 end
+
+-- local readFile = require(folderPath .. "src.utils").readFile
+-- local langs = {"es-AR", "en-US"}
+-- local dictionary           = {}
+-- local disabledRules        = {}
+-- local hiddenFalsePositives = {}
+--
+-- for i, lang in ipairs(langs) do
+--     local content = readFile("dictionary", lang)
+--     dictionary[i] = content
+--     dictionary[i] = readFile("dictionary", lang)
+--     disabledRules[i]        = readFile("disabledRules", lang)
+--     hiddenFalsePositives[i] = readFile("hiddenFalsePositives", lang)
+-- end
+-- print(vim.inspect(dictionary))
+-- print(vim.inspect(disabledRules))
+-- print(vim.inspect(hiddenFalsePositives))
