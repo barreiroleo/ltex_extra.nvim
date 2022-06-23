@@ -11,6 +11,7 @@ local inspect            = require("src.utils").inspect
 local writeFile          = require("src.utils").writeFile
 local readFile           = require("src.utils").readFile
 
+local load_file          = require("src.utils").load_file
 local langs = {"es-AR", "en-US"}
 
 -- Command Handler mockup.
@@ -31,17 +32,10 @@ execute_command(commands.disableRules)
 execute_command(commands.hideFalsePositives)
 
 println("Reading file")
-local dictionary           = {}
-local disabledRules        = {}
-local hiddenFalsePositives = {}
-for _, lang in ipairs(langs) do
-    dictionary[lang]           = readFile("dictionary", lang)
-    disabledRules[lang]        = readFile("disabledRules", lang)
-    hiddenFalsePositives[lang] = readFile("hiddenFalsePositives", lang)
-end
-print(inspect(dictionary))
-print(inspect(disabledRules))
-print(inspect(hiddenFalsePositives))
+local dictionary           = load_file("dictionary", langs)
+local disabledRules        = load_file("disabledRules", langs)
+local hiddenFalsePositives = load_file("hiddenFalsePositives", langs)
+print(inspect({dictionary, disabledRules, hiddenFalsePositives}))
 
-local dictionary_example = {["es-AR"] = {"Errorr"}, ["en-US"] = {"Errorr"}}
-print(inspect(dictionary_example))
+-- local dictionary_example = {["es-AR"] = {"Errorr"}, ["en-US"] = {"Errorr"}}
+-- print(M.inspect(dictionary_example))
