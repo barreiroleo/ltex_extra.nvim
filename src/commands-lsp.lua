@@ -1,9 +1,8 @@
-local folderPath = (...):match("(.-)[^%.]+$") -- returns 'lib.foo.'
 local debug = false
 
-local inspect   = require(folderPath .. "utils").inspect
-local writeFile = require(folderPath .. "utils").writeFile
-local loadFile  = require(folderPath .. "utils").readFile
+local inspect   = require("src.utils").inspect
+local writeFile = require("src.utils").writeFile
+local loadFile  = require("src.utils").readFile
 
 
 local printdb = function(args)
