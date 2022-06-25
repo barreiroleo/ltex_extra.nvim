@@ -33,6 +33,14 @@ M.readFile = function(type, lang)
     return lines
 end
 
+M.loadFile = function(type, langs)
+    local content = {}
+    for _, lang in ipairs(langs) do
+        content[lang] = M.readFile(type, lang)
+    end
+    return content
+end
+
 M.inspect = function(args)
     local inspect = nil
     if vim then
@@ -41,17 +49,6 @@ M.inspect = function(args)
         inspect = require("inspect") -- from luarocks
     end
     return inspect(args)
-end
-
--- M.load_file(string, table{string}) => table{["lang"] = {values}}
--- return the content of a file indicated by type.
--- type can be "dictionary", "disabledRules", "hiddenFalsePositives"
-M.load_file = function(type, langs)
-    local content = {}
-    for _, lang in ipairs(langs) do
-        content[lang] = M.readFile(type, lang)
-    end
-    return content
 end
 
 return M
