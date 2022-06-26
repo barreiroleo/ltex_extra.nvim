@@ -81,8 +81,8 @@ M.updateConfig = function (configtype, lang)
 end
 
 M.updateConfigFull = function (langs)
-    vim.notify("UpdateFullConfig")
-    langs = langs or {"es-AR", "en-US"}
+    vim.notify("LTeX files loaded")
+    langs = langs or package.loaded.latex.opts.load_langs
     for _, lang in pairs(langs) do
         M.updateConfig(types.dict, lang)
         M.updateConfig(types.dRules, lang)
@@ -118,7 +118,7 @@ M.hideFalsePositives = function(command)
 end
 
 local orig_execute_command = vim.lsp.buf.execute_command
-vim.lsp.buf.execute_command = function(command)
+M.commandHandler = function (command)
     -- printdb(vim.inspect(command))
     if command.command == '_ltex.addToDictionary' then
         M.addToDictionary(command)
