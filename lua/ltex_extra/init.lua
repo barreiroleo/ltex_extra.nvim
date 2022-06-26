@@ -19,9 +19,9 @@ M.setup = function (opts)
         end
     end
 
-    vim.lsp.buf.execute_command = require("latex.src.commands-lsp").commandHandler
+    vim.lsp.buf.execute_command = require("ltex_extra.src.commands-lsp").commandHandler
     if opts.init_check == true then
-        require("latex.src.commands-lsp").updateConfigFull(opts.load_langs)
+        require("ltex_extra.src.commands-lsp").updateConfigFull(opts.load_langs)
     end
 end
 
