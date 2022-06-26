@@ -1,8 +1,8 @@
 local debug = false
 
-local inspect   = require("src.utils").inspect
-local writeFile = require("src.utils").writeFile
-local loadFile  = require("src.utils").readFile
+local inspect   = require("latex.src.utils").inspect
+local writeFile = require("latex.src.utils").writeFile
+local loadFile  = require("latex.src.utils").readFile
 
 
 local printdb = function(args)
