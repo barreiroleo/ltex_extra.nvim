@@ -1,8 +1,8 @@
 local debug = false
 
-local inspect   = require("latex.src.utils").inspect
-local writeFile = require("latex.src.utils").writeFile
-local loadFile  = require("latex.src.utils").readFile
+local inspect   = require("ltex_extra.src.utils").inspect
+local writeFile = require("ltex_extra.src.utils").writeFile
+local loadFile  = require("ltex_extra.src.utils").readFile
 
 
 local printdb = function(args)
@@ -82,7 +82,7 @@ end
 
 M.updateConfigFull = function (langs)
     vim.notify("LTeX files loaded")
-    langs = langs or package.loaded.latex.opts.load_langs
+    langs = langs or package.loaded.ltex_extra.opts.load_langs
     for _, lang in pairs(langs) do
         M.updateConfig(types.dict, lang)
         M.updateConfig(types.dRules, lang)
