@@ -6,7 +6,7 @@ local M = {}
 
 local default_opts = {
     load_langs = {"es-AR", "en-US"},
-    init_check = false,
+    init_check = true,
 }
 
 M.opts = {}
