@@ -4,6 +4,8 @@
 # LTeX_extra.nvim
 <h6>Provides external LTeX file handling (off-spec lsp) and other functions.</h6>
 <h6>🚧 This plugins is currently on development, expect some changes</h6>
+<h6>⛔ Developed on Nvim 7.0: for Nvim 7.2 is broken, working on it.</h6>
+
 
 [![Lua](https://img.shields.io/badge/Lua-blue.svg?style=for-the-badge&logo=lua)](http://www.lua.org)
 ![Work In Progress](https://img.shields.io/badge/Work%20In%20Progress-orange?style=for-the-badge)
