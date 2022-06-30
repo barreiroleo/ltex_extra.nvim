@@ -20,6 +20,13 @@ M.setup = function (opts)
     end
 
     vim.lsp.buf.execute_command = require("ltex_extra.src.commands-lsp").commandHandler
+
+    -- local orig_execute_command = vim.lsp.buf.execute_command
+    -- vim.lsp.buf.execute_command = function (command)
+    --     print(vim.inspect(command))
+    --     orig_execute_command(command)
+    -- end
+
     if opts.init_check == true then
         require("ltex_extra.src.commands-lsp").updateConfigFull(opts.load_langs)
     end
