@@ -4,7 +4,7 @@
 # LTeX_extra.nvim
 <h6>Provides external LTeX file handling (off-spec lsp) and other functions.</h6>
 <h6>🚧 This plugins is currently on development, expect some changes</h6>
-<h6>⛔ Developed on Nvim 7.0: for Nvim 7.2 is broken, working on it.</h6>
+<h6>Developed on Nvim stable: Nightly 0.8 is working.</h6>
 
 
 [![Lua](https://img.shields.io/badge/Lua-blue.svg?style=for-the-badge&logo=lua)](http://www.lua.org)
@@ -65,10 +65,10 @@ The recommended way to use `ltex-extra` is calling it from `ltex-ls` `on_attach`
 Next example use `nvim-config` typical launch server and default settings for `ltex-extra`, you can use it as template.
 
 *Notes: You can pass to set up only the arguments that you are interested in.
-At the moment, `ltex-extra` needs to found `dictionary`, `disabledRules` and `hiddenFalsePositives` in your `ltex` settings.*
+At the moment, if you define stuff in `dictionary`, `disabledRules` and `hiddenFalsePositives` in your `ltex` settings, they haven't backup.*
 
 ```lua
-lspconfig.ltex.setup {
+require("lspconfig").ltex.setup {
     on_attach = function(client, bufnr)
         --- your other on_attach functions.
         require("ltex_extra").setup{
@@ -80,16 +80,13 @@ lspconfig.ltex.setup {
     settings = {
         ltex = {
             --- your settings.
-            dictionary = {},
-            disabledRules = {},
-            hiddenFalsePositives = {},
         }
     }
 }
 ```
 
 ## To-do list
-- [ ] Write the docs.
-- [ ] Add capability for create dictionary, disabledRules and hiddenFalsePositives keys in ltex settings.
+- [x] Write the docs.
+- [x] Add capability for create dictionary, disabledRules and hiddenFalsePositives keys in ltex settings.
 - [ ] Add path specification for files in setup.
 - [ ] Add capability for read the existing files in path.

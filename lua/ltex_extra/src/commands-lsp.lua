@@ -21,35 +21,37 @@ local function catch_ltex()
 end
 
 local function update_dictionary(client, lang)
-    if client.config.settings.ltex.dictionary then
-        client.config.settings.ltex.dictionary[lang] = loadFile(types.dict, lang)
-        return client.notify('workspace/didChangeConfiguration', client.config.settings)
-    else
-        return vim.notify("Error when reading dictionary config, check it")
+    log.trace("update_dictionary")
+    if not client.config.settings.ltex.dictionary then
+        client.config.settings.ltex.dictionary = {}
     end
+    client.config.settings.ltex.dictionary[lang] = loadFile(types.dict, lang)
+    log.debug(inspect(client.config.settings.ltex.dictionary))
+    return client.notify('workspace/didChangeConfiguration', client.config.settings)
 end
 
 local function update_disabledRules(client, lang)
-    if client.config.settings.ltex.disabledRules then
-        client.config.settings.ltex.disabledRules[lang] = loadFile(types.dRules, lang)
-        return client.notify('workspace/didChangeConfiguration', client.config.settings)
-    else
-        return vim.notify("Error when reading disabledRules config, check it")
+    log.trace("update_disabledRules")
+    if not client.config.settings.ltex.disabledRules then
+        client.config.settings.ltex.disabledRules = {}
     end
+    client.config.settings.ltex.disabledRules[lang] = loadFile(types.dRules, lang)
+    log.debug(inspect(client.config.settings.ltex.disabledRules))
+    return client.notify('workspace/didChangeConfiguration', client.config.settings)
 end
 
 local function update_hiddenFalsePositive(client, lang)
-    if client.config.settings.ltex.hiddenFalsePositives then
-        client.config.settings.ltex.hiddenFalsePositives[lang] = loadFile(types.hRules, lang)
-        return client.notify('workspace/didChangeConfiguration', client.config.settings)
-    else
-        return vim.notify("Error when reading hiddenFalsePositives config, check it")
+    log.trace("update_hiddenFalsePositive")
+    if not client.config.settings.ltex.hiddenFalsePositives then
+        client.config.settings.ltex.hiddenFalsePositives = {}
     end
+    client.config.settings.ltex.hiddenFalsePositives[lang] = loadFile(types.hRules, lang)
+    log.debug(inspect(client.config.settings.ltex.hiddenFalsePositives))
+    return client.notify('workspace/didChangeConfiguration', client.config.settings)
 end
 
 local M = {}
 
-M.updateConfig = function (configtype, lang)
 M.updateConfig = function(configtype, lang)
     log.trace("updateConfig")
     local client = catch_ltex()
@@ -60,9 +62,13 @@ M.updateConfig = function(configtype, lang)
             update_disabledRules(client, lang)
         elseif configtype == types.hRules then
             update_hiddenFalsePositive(client, lang)
-        end
         else
-        return nil
+            log.fmt_error("Config type unknown")
+            return vim.notify("Config type unknown")
+        end
+    else
+        log.fmt_error("Error catching ltex client")
+        return vim.notify("Error catching ltex client")
     end
 end
 
