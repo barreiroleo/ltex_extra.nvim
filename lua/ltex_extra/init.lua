@@ -19,13 +19,9 @@ M.setup = function (opts)
         end
     end
 
-    vim.lsp.buf.execute_command = require("ltex_extra.src.commands-lsp").commandHandler
-
-    -- local orig_execute_command = vim.lsp.buf.execute_command
-    -- vim.lsp.buf.execute_command = function (command)
-    --     print(vim.inspect(command))
-    --     orig_execute_command(command)
-    -- end
+    vim.lsp.commands['_ltex.addToDictionary']    = require("ltex_extra.src.commands-lsp").addToDictionary
+    vim.lsp.commands['_ltex.hideFalsePositives'] = require("ltex_extra.src.commands-lsp").hideFalsePositives
+    vim.lsp.commands['_ltex.disableRules']       = require("ltex_extra.src.commands-lsp").disableRules
 
     if opts.init_check == true then
         require("ltex_extra.src.commands-lsp").updateConfigFull(opts.load_langs)
