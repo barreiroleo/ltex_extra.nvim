@@ -16,9 +16,6 @@
 `LTeX_extra` is a plugin for Neovim that provide the functions that are called on LSP code actions by `ltex-ls`: [`addToDictionary`](https://valentjn.github.io/ltex/ltex-ls/server-usage.html#_ltexhidefalsepositives-client),
 [`disableRule`](https://valentjn.github.io/ltex/ltex-ls/server-usage.html#_ltexdisablerules-client),
 [`hideFalsePositive`](https://valentjn.github.io/ltex/ltex-ls/server-usage.html#_ltexaddtodictionary-client).
-
-For doing this, `LTeX_extra` capture the command handler (`vim.lsp.buf.execute_command`) and adds the needed actions.
-These actions export the arguments gave by [`ltex-ls`](https://github.com/valentjn/ltex-ls) to external files like official [`vscode-ltex`](https://github.com/valentjn/vscode-ltex) plugin.
 Also, `LTeX_extra` provide extra [features](#features).
 
 
