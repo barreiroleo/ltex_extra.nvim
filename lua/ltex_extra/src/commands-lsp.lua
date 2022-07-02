@@ -117,18 +117,4 @@ M.hideFalsePositives = function(command)
     end
 end
 
-local orig_execute_command = vim.lsp.buf.execute_command
-M.commandHandler = function (command)
-    -- printdb(vim.inspect(command))
-    if command.command == '_ltex.addToDictionary' then
-        M.addToDictionary(command)
-    elseif command.command == '_ltex.disableRules' then
-        M.disableRules(command)
-    elseif command.command == '_ltex.hideFalsePositives' then
-        M.hideFalsePositives(command)
-    else
-        orig_execute_command(command)
-    end
-end
-
 return M
