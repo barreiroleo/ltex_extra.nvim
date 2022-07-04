@@ -87,3 +87,4 @@ require("lspconfig").ltex.setup {
 - [x] Add capability for create dictionary, disabledRules and hiddenFalsePositives keys in ltex settings.
 - [ ] Add path specification for files in setup.
 - [ ] Add capability for read the existing files in path.
+- [ ] Abort initial load if the files doesn't exist.

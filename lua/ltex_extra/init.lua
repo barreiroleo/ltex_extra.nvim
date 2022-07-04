@@ -5,18 +5,20 @@ local M = {}
 local default_opts = {
     load_langs = { "es-AR", "en-US" },
     init_check = true,
+    path = nil,
 }
 
 M.opts = {}
 
 M.setup = function(opts)
     log.trace("Merge options")
-    M.opts = opts or default_opts
+    opts = opts or default_opts
     for key, value in pairs(default_opts) do
-        if not M.opts[key] then
-            M.opts[key] = value
-        end
+        if not opts[key] then opts[key] = value end
     end
+    if opts.path then opts.path = opts.path .. "/" else opts.path = "" end
+    M.opts = opts
+    log.debug("Opts: " .. vim.inspect(M.opts))
 
     log.trace("Add commands to lsp")
     vim.lsp.commands['_ltex.addToDictionary']    = require("ltex_extra.src.commands-lsp").addToDictionary
