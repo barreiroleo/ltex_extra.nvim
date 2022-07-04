@@ -1,8 +1,7 @@
 local log = require("ltex_extra.src.log")
 
-local inspect   = require("ltex_extra.src.utils").inspect
-local writeFile = require("ltex_extra.src.utils").writeFile
-local loadFile  = require("ltex_extra.src.utils").readFile
+local exportFile = require("ltex_extra.src.utils").exportFile
+local loadFile  = require("ltex_extra.src.utils").loadFile
 
 local types = {
     ["dict"] = "dictionary",
@@ -26,7 +25,7 @@ local function update_dictionary(client, lang)
         client.config.settings.ltex.dictionary = {}
     end
     client.config.settings.ltex.dictionary[lang] = loadFile(types.dict, lang)
-    log.debug(inspect(client.config.settings.ltex.dictionary))
+    log.debug(vim.inspect(client.config.settings.ltex.dictionary))
     return client.notify('workspace/didChangeConfiguration', client.config.settings)
 end
 
@@ -36,7 +35,7 @@ local function update_disabledRules(client, lang)
         client.config.settings.ltex.disabledRules = {}
     end
     client.config.settings.ltex.disabledRules[lang] = loadFile(types.dRules, lang)
-    log.debug(inspect(client.config.settings.ltex.disabledRules))
+    log.debug(vim.inspect(client.config.settings.ltex.disabledRules))
     return client.notify('workspace/didChangeConfiguration', client.config.settings)
 end
 
@@ -46,7 +45,7 @@ local function update_hiddenFalsePositive(client, lang)
         client.config.settings.ltex.hiddenFalsePositives = {}
     end
     client.config.settings.ltex.hiddenFalsePositives[lang] = loadFile(types.hRules, lang)
-    log.debug(inspect(client.config.settings.ltex.hiddenFalsePositives))
+    log.debug(vim.inspect(client.config.settings.ltex.hiddenFalsePositives))
     return client.notify('workspace/didChangeConfiguration', client.config.settings)
 end
 
@@ -72,7 +71,7 @@ M.updateConfig = function(configtype, lang)
     end
 end
 
-M.updateConfigFull = function(langs)
+M.reload = function(langs)
     log.trace("updateConfigFull")
     langs = langs or package.loaded.ltex_extra.opts.load_langs
     for _, lang in pairs(langs) do
@@ -87,8 +86,8 @@ M.addToDictionary = function(command)
     log.trace("addToDictionary")
     local args = command.arguments[1].words
     for lang, words in pairs(args) do
-        log.fmt_debug("Lang: %s Words: %s", inspect(lang), inspect(words))
-        writeFile(types.dict, lang, words)
+        log.fmt_debug("Lang: %s Words: %s", vim.inspect(lang), vim.inspect(words))
+        exportFile(types.dict, lang, words)
         M.updateConfig(types.dict, lang)
     end
 end
@@ -97,8 +96,8 @@ M.disableRules = function(command)
     log.trace("disableRules")
     local args = command.arguments[1].ruleIds
     for lang, rules in pairs(args) do
-        log.fmt_debug("Lang: %s Rules: %s", inspect(lang), inspect(rules))
-        writeFile(types.dRules, lang, rules)
+        log.fmt_debug("Lang: %s Rules: %s", vim.inspect(lang), vim.inspect(rules))
+        exportFile(types.dRules, lang, rules)
         M.updateConfig(types.dRules, lang)
     end
 end
@@ -107,8 +106,8 @@ M.hideFalsePositives = function(command)
     log.trace("hideFalsePositives")
     local args = command.arguments[1].falsePositives
     for lang, rules in pairs(args) do
-        log.fmt_debug("Lang: %s Rules: %s", inspect(lang), inspect(rules))
-        writeFile(types.hRules, lang, rules)
+        log.fmt_debug("Lang: %s Rules: %s", vim.inspect(lang), vim.inspect(rules))
+        exportFile(types.hRules, lang, rules)
         M.updateConfig(types.hRules, lang)
     end
 end

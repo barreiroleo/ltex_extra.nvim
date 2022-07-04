@@ -10,6 +10,8 @@ local default_opts = {
 
 M.opts = {}
 
+M.reload = function (...) require("ltex_extra.src.commands-lsp").reload(...) end
+
 M.setup = function(opts)
     log.trace("Merge options")
     opts = opts or default_opts
@@ -27,25 +29,8 @@ M.setup = function(opts)
 
     log.trace("Inital load files")
     if opts.init_check == true then
-        require("ltex_extra.src.commands-lsp").updateConfigFull(opts.load_langs)
+        M.reload(opts.load_langs)
     end
 end
 
 return M
-
--- Dev notes:
---
--- Dummy functions for test vim.lsp.commands
--- local dummy_calls = 0
--- local dummy_cmd = function()
---     print(dummy_calls)
---     dummy_calls = dummy_calls + 1
---     print(dummy_calls)
--- end
-
--- Inspect function for arguments. Doesn't work after nvim 0.7.
--- local orig_execute_command = vim.lsp.buf.execute_command
--- vim.lsp.buf.execute_command = function (command)
---     print(vim.inspect(command))
---     orig_execute_command(command)
--- end

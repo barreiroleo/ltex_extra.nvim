@@ -24,39 +24,14 @@ else
     log.fmt_fatal = dummy
 end
 
+log.vimwarn = function (...)
+    vim.notify(..., vim.log.levels.WARN)
+    log.warn(...)
+end
 
--- local default_config = {
---   -- Name of the plugin. Prepended to log messages
---   plugin = "plenary",
---
---   -- Should print the output to neovim while running
---   -- values: 'sync','async',false
---   use_console = "async",
---
---   -- Should highlighting be used in console (using echohl)
---   highlights = true,
---
---   -- Should write to a file
---   use_file = true,
---
---   -- Should write to the quickfix list
---   use_quickfix = false,
---
---   -- Any messages above this level will be logged.
---   level = p_debug and "debug" or "info",
---
---   -- Level configuration
---   modes = {
---     { name = "trace", hl = "Comment" },
---     { name = "debug", hl = "Comment" },
---     { name = "info", hl = "None" },
---     { name = "warn", hl = "WarningMsg" },
---     { name = "error", hl = "ErrorMsg" },
---     { name = "fatal", hl = "ErrorMsg" },
---   },
---
---   -- Can limit the number of decimals displayed for floats
---   float_precision = 0.01,
--- }
+log.vimerror = function (...)
+    vim.notify(..., vim.log.levels.ERROR)
+    log.error(...)
+end
 
 return log
