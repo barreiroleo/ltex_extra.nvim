@@ -33,6 +33,7 @@ Also, `LTeX_extra` provide extra [features](#features).
 
 ## Features
 Cover your eyes. In the next demos there are many orthographic horrors.
+Screencast recorded using [macros](https://github.com/barreiroleo/macros).
 
 ### Code Actions
 Provide functions for `add to dictionary`, `disable rules` and `hidde false positives`.
