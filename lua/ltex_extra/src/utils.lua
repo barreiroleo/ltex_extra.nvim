@@ -37,7 +37,7 @@ M.check_dir = function(dirname)
     log.trace("Checking dir", dirname)
     if dirname == "" then return true end
     if not M.path_exist(dirname) then
-        log.vimwarn(dirname .. " not found, making it")
+        log.info(dirname .. " not found, making it")
         if M.mkdir(dirname) then return true
         else return false end
     else

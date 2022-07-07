@@ -24,6 +24,11 @@ else
     log.fmt_fatal = dummy
 end
 
+log.viminfo = function (...)
+    vim.notify(...)
+    log.info(...)
+end
+
 log.vimwarn = function (...)
     vim.notify(..., vim.log.levels.WARN)
     log.warn(...)

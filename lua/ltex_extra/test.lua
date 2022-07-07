@@ -1,17 +1,17 @@
-local inspect = require("inspect")
+local inspect = vim.inspect
 local lnsep = "=========="
 local function println(arg) print("\n" .. lnsep .. arg .. lnsep) end
 
 local commands           = require("test.commands")
-local addToDictionary    = require("src.commands-lsp").addToDictionary
-local disableRules       = require("src.commands-lsp").disableRules
-local hideFalsePositives = require("src.commands-lsp").hideFalsePositives
+local addToDictionary    = require("ltex_extra.src.commands-lsp").addToDictionary
+local disableRules       = require("ltex_extra.src.commands-lsp").disableRules
+local hideFalsePositives = require("ltex_extra.src.commands-lsp").hideFalsePositives
 
-local inspect            = require("src.utils").inspect
-local writeFile          = require("src.utils").writeFile
-local readFile           = require("src.utils").readFile
+local inspect            = require("ltex_extra.src.utils").inspect
+local writeFile          = require("ltex_extra.src.utils").writeFile
+local readFile           = require("ltex_extra.src.utils").readFile
 
-local load_file          = require("src.utils").load_file
+local load_file          = require("ltex_extra.src.utils").load_file
 local langs = {"es-AR", "en-US"}
 
 -- Command Handler mockup.

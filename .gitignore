@@ -1,2 +1,4 @@
-ltex.*.txt
 ignore/*
+docs/macros*
+ltex.*.txt
+*.mkv
