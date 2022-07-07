@@ -20,32 +20,38 @@ Also, `LTeX_extra` provide extra [features](#features).
 
 
 # Table of Contents
+
 - [Features](#features)
     - [Code Actions](#code-actions)
-    - [Autoload LTeX files](#autoload-ltex-files)
-    - [Reload LTeX files](#reload-ltex-files)
+    - [Custom export path](#custom-export-path)
+    - [Autoload exported data](#autoload-exported-data)
+    - [Update on demand](#update-on-demand)
 - [Installation](#installation)
     - [Packer](#packer)
 - [Configuration](#configuration)
 - [To-do list](#to-do-list)
 
 ## Features
-- [Code Actions](#code-actions): Export to external files the data of next actions.
-    - Add to dictionary selected words.
-    - Disable rules to check.
-    - Hide false positives for selected cases.
-- [Autoload LTeX files](#autoload-ltex-files): Autoload saved configs for a set required languages.
-- [Reload LTeX files](#reload-ltex-files): On demand reload saved configs:
 
 ### Code Actions
+Provide functions for `add to dictionary`, `disable rules` and `hidde false positives`.
 
-https://user-images.githubusercontent.com/48270301/175837715-dc2d122e-5ffd-422d-a662-f9cdc19f85ec.mp4
+https://user-images.githubusercontent.com/48270301/177694689-b6b12b4a-3981-47fe-aa88-567697f797bd.mp4
 
-### Autoload LTeX files
-https://user-images.githubusercontent.com/48270301/175837717-1b2d3ba2-042c-4ae4-bf4c-ef2d1273c207.mp4
+### Custom export path
+Config you path, give you compatibility with official vscode extension.
 
-### Reload LTeX files
-https://user-images.githubusercontent.com/48270301/175837718-21ae3ebf-0ee3-4fcf-9e4f-bd82516c3ebc.mp4
+https://user-images.githubusercontent.com/48270301/177694714-2f9d7477-26b6-4bf5-a47e-63ce2f82d76a.mp4
+
+### Autoload exported data
+Autoload exported data for required languages.
+
+https://user-images.githubusercontent.com/48270301/177694724-736159ab-c202-4325-ad23-405c76676b79.mp4
+
+### Update on demand
+Reload exported data on demand:
+
+https://user-images.githubusercontent.com/48270301/177694740-bc8bdb4c-0f6b-4f63-98af-54ec23196f27.mp4
 
 ## Installation
 This plugin requires an instance of `ltex_ls` language server attached in the current buffer.
@@ -66,25 +72,26 @@ At the moment, if you define stuff in `dictionary`, `disabledRules` and `hiddenF
 
 ```lua
 require("lspconfig").ltex.setup {
+    capabilities = your_capabilities,
     on_attach = function(client, bufnr)
-        --- your other on_attach functions.
+        -- your other on_attach functions.
         require("ltex_extra").setup{
             load_langs = {"es-AR", "en-US"},
             init_check = true,
+            path = ".vscode"    -- for compatibility with official plugin.
         }
     end,
-    capabilities = capabilities,
     settings = {
         ltex = {
-            --- your settings.
+            -- your settings.
         }
     }
 }
 ```
 
 ## To-do list
-- [x] Write the docs.
-- [x] Add capability for create dictionary, disabledRules and hiddenFalsePositives keys in ltex settings.
-- [ ] Add path specification for files in setup.
-- [ ] Add capability for read the existing files in path.
+- [ ] Write the docs.
+- [x] Add capability for create dictionary, disabledRules and hiddenFalsePositives keys in LTeX settings.
+- [x] Add path specification for files in setup.
+- [x] Add capability for read the existing files in path.
 - [ ] Abort initial load if the files doesn't exist.
