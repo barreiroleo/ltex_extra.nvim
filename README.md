@@ -32,6 +32,7 @@ Also, `LTeX_extra` provide extra [features](#features).
 - [To-do list](#to-do-list)
 
 ## Features
+Cover your eyes. In the next demos there are many orthographic horrors.
 
 ### Code Actions
 Provide functions for `add to dictionary`, `disable rules` and `hidde false positives`.
