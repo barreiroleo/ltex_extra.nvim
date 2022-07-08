@@ -13,7 +13,7 @@ local function catch_ltex()
     log.trace("catch_ltex")
     local buf_clients = vim.lsp.buf_get_clients()
     local client = nil
-    for _, lsp in ipairs(buf_clients) do
+    for _, lsp in pairs(buf_clients) do
         if lsp.name == "ltex" then client = lsp end
     end
     return client
