@@ -4,7 +4,7 @@ local default_opts = {
     load_langs = { "es-AR", "en-US" }, -- table <string> : language for witch dictionaries will be loaded
     init_check = true, -- boolean : whether to load dictionaries on startup
     path = nil, -- string : path to store dictionaries. Relative path uses current working directory
-    log_level = false, -- boolean|string : plenary log level. One of "trace", "debug", "info", "warn", "error", "fatal" (true = "warn")
+    log_level = "none", -- string : "none" for no logs or plenary log level. One of "trace", "debug", "info", "warn", "error", "fatal"
 }
 
 M.opts = {}

@@ -1,20 +1,15 @@
 local log = {}
 
 log.init = function (level)
-    if type(level) == "string" then
+    if type(level) == "string" and level ~= "none" then
+        if not pcall(require, "plenary.log") then
+            vim.notify("`ltex_extra` requires the `plenary` plugin to display logs", vim.log.levels.WARN)
+            return
+        end
         local tmp_log = require("plenary.log").new {
             plugin = "ltex_extra",
             use_file = false,
             level = level
-        }
-        for k, v in pairs(tmp_log) do
-          log[k] = v
-        end
-    elseif type(level) == "boolean" and level == true then
-        local tmp_log = require("plenary.log").new {
-            plugin = "ltex_extra",
-            use_file = false,
-            level = "warn"
         }
         for k, v in pairs(tmp_log) do
           log[k] = v
