@@ -1,11 +1,10 @@
-local log = require("ltex_extra.src.log")
-
 local M = {}
 
 local default_opts = {
-    load_langs = { "es-AR", "en-US" },
-    init_check = true,
-    path = nil,
+    load_langs = { "es-AR", "en-US" }, -- table <string> : language for witch dictionaries will be loaded
+    init_check = true, -- boolean : whether to load dictionaries on startup
+    path = nil, -- string : path to store dictionaries. Relative path uses current working directory
+    log_level = "none", -- string : "none" for no logs or plenary log level. One of "trace", "debug", "info", "warn", "error", "fatal"
 }
 
 M.opts = {}
@@ -14,12 +13,10 @@ M.reload = function (...) require("ltex_extra.src.commands-lsp").reload(...) end
 
 M.setup = function(opts)
     log.trace("Merge options")
-    opts = opts or default_opts
-    for key, value in pairs(default_opts) do
-        if not opts[key] then opts[key] = value end
-    end
     if opts.path then opts.path = opts.path .. "/" else opts.path = "" end
-    M.opts = opts
+    M.opts = vim.tbl_deep_extend('force', default_opts, opts)
+
+    local log = require("ltex_extra.src.log").init(M.opts.log_level)
     log.debug("Opts: " .. vim.inspect(M.opts))
 
     log.trace("Add commands to lsp")
@@ -28,8 +25,8 @@ M.setup = function(opts)
     vim.lsp.commands['_ltex.disableRules']       = require("ltex_extra.src.commands-lsp").disableRules
 
     log.trace("Inital load files")
-    if opts.init_check == true then
-        M.reload(opts.load_langs)
+    if M.opts.init_check == true then
+        M.reload(M.opts.load_langs)
     end
 end
 
