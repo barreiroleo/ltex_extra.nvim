@@ -92,6 +92,14 @@ require("lspconfig").ltex.setup {
 }
 ```
 
+### Contributors
+
+Thanks to these people for your time, effort and ideas.
+
+<a href="https://github.com/barreiroleo/ltex_extra.nvim/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=barreiroleo/ltex_extra.nvim" />
+</a>
+
 ## To-do list
 - [ ] Write the docs.
 - [x] Add capability for create dictionary, disabledRules and hiddenFalsePositives keys in LTeX settings.
