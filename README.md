@@ -36,7 +36,9 @@ Cover your eyes. In the next demos there are many orthographic horrors.
 Screencast recorded using my [macros](https://github.com/barreiroleo/macros) tool.
 
 ### Code Actions
-Provide functions for `add to dictionary`, `disable rules` and `hidde false positives`.
+Provide functions for `add to dictionary`, `disable rules` and `hidde false positives`.\
+*Maybe you want mapping the LPS Code Action method.
+Check the docs: [neovim suggested configuration](https://github.com/neovim/nvim-lspconfig#suggested-configuration)*
 
 https://user-images.githubusercontent.com/48270301/177694689-b6b12b4a-3981-47fe-aa88-567697f797bd.mp4
 
