@@ -3,8 +3,8 @@
 
 # LTeX_extra.nvim
 <h6>Provides external LTeX file handling (off-spec lsp) and other functions.</h6>
-<h6>🚧 This plugins is currently on development, expect some changes</h6>
-<h6>Developed on Nvim stable: Nightly 0.8 is working.</h6>
+<h6>🚧 This plugin is on development, expect some changes</h6>
+<h6>Developed on Nvim stable v0.8</h6>
 
 
 [![Lua](https://img.shields.io/badge/Lua-blue.svg?style=for-the-badge&logo=lua)](http://www.lua.org)
