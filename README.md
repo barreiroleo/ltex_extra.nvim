@@ -23,6 +23,7 @@ Also, `LTeX_extra` provide extra [features](#features).
 
 - [Features](#features)
     - [Code Actions](#code-actions)
+        - [Lspsaga](#lspsaga)
     - [Custom export path](#custom-export-path)
     - [Autoload exported data](#autoload-exported-data)
     - [Update on demand](#update-on-demand)
@@ -41,6 +42,9 @@ Provide functions for `add to dictionary`, `disable rules` and `hidde false posi
 Check the docs: [neovim suggested configuration](https://github.com/neovim/nvim-lspconfig#suggested-configuration)*
 
 https://user-images.githubusercontent.com/48270301/177694689-b6b12b4a-3981-47fe-aa88-567697f797bd.mp4
+
+#### Lspsaga
+Some users reported an issue with code actions when called from lspsaga. I'm not using lspsaga, so PR are very welcome.
 
 ### Custom export path
 Config you path, give you compatibility with official vscode extension.
