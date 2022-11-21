@@ -46,6 +46,10 @@ https://user-images.githubusercontent.com/48270301/177694689-b6b12b4a-3981-47fe-
 #### Lspsaga
 Some users reported an issue with code actions when called from lspsaga. I'm not using lspsaga, so PR are very welcome.
 
+https://user-images.githubusercontent.com/39244876/201530888-077e76ad-211c-408f-80dc-89ba59751532.mov
+
+_Thanks to @felipejoribeiro for the screenrecording_
+
 ### Custom export path
 Config you path, give you compatibility with official vscode extension.
 
