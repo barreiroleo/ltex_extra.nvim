@@ -1,7 +1,7 @@
 local log = require("ltex_extra.src.log")
 
 local exportFile = require("ltex_extra.src.utils").exportFile
-local loadFile  = require("ltex_extra.src.utils").loadFile
+local loadFile   = require("ltex_extra.src.utils").loadFile
 
 local types = {
     ["dict"] = "dictionary",
@@ -19,34 +19,40 @@ local function catch_ltex()
     return client
 end
 
+local function get_settings(client)
+    if not client.config.settings.ltex then
+        client.config.settings.ltex = {}
+    end
+    for _, index in pairs(types) do
+        if not client.config.settings.ltex[index] then
+            client.config.settings.ltex[index] = {}
+        end
+    end
+    return client.config.settings
+end
+
 local function update_dictionary(client, lang)
     log.trace("update_dictionary")
-    if not client.config.settings.ltex.dictionary then
-        client.config.settings.ltex.dictionary = {}
-    end
-    client.config.settings.ltex.dictionary[lang] = loadFile(types.dict, lang)
-    log.debug(vim.inspect(client.config.settings.ltex.dictionary))
-    return client.notify('workspace/didChangeConfiguration', client.config.settings)
+    local settings = get_settings(client)
+    settings.ltex.dictionary[lang] = loadFile(types.dict, lang)
+    log.debug(vim.inspect(settings.ltex.dictionary))
+    return client.notify('workspace/didChangeConfiguration', settings)
 end
 
 local function update_disabledRules(client, lang)
     log.trace("update_disabledRules")
-    if not client.config.settings.ltex.disabledRules then
-        client.config.settings.ltex.disabledRules = {}
-    end
-    client.config.settings.ltex.disabledRules[lang] = loadFile(types.dRules, lang)
-    log.debug(vim.inspect(client.config.settings.ltex.disabledRules))
-    return client.notify('workspace/didChangeConfiguration', client.config.settings)
+    local settings = get_settings(client)
+    settings.ltex.disabledRules[lang] = loadFile(types.dRules, lang)
+    log.debug(vim.inspect(settings.ltex.disabledRules))
+    return client.notify('workspace/didChangeConfiguration', settings)
 end
 
 local function update_hiddenFalsePositive(client, lang)
     log.trace("update_hiddenFalsePositive")
-    if not client.config.settings.ltex.hiddenFalsePositives then
-        client.config.settings.ltex.hiddenFalsePositives = {}
-    end
-    client.config.settings.ltex.hiddenFalsePositives[lang] = loadFile(types.hRules, lang)
-    log.debug(vim.inspect(client.config.settings.ltex.hiddenFalsePositives))
-    return client.notify('workspace/didChangeConfiguration', client.config.settings)
+    local settings = get_settings(client)
+    settings.ltex.hiddenFalsePositives[lang] = loadFile(types.hRules, lang)
+    log.debug(vim.inspect(settings.ltex.hiddenFalsePositives))
+    return client.notify('workspace/didChangeConfiguration', settings)
 end
 
 local M = {}
