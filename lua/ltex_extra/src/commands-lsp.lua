@@ -78,52 +78,52 @@ M.updateConfig = function(configtype, lang)
 end
 
 M.reload = function(langs)
-	log.trace("updateConfigFull")
-	langs = langs or package.loaded.ltex_extra.opts.load_langs
-	for _, lang in pairs(langs) do
-		log.fmt_trace("Loading %s", lang)
-		vim.schedule(function()
-			M.updateConfig(types.dict, lang)
-			M.updateConfig(types.dRules, lang)
-			M.updateConfig(types.hRules, lang)
-		end)
-	end
+    log.trace("updateConfigFull")
+    langs = langs or package.loaded.ltex_extra.opts.load_langs
+    for _, lang in pairs(langs) do
+        log.fmt_trace("Loading %s", lang)
+        vim.schedule(function()
+            M.updateConfig(types.dict, lang)
+            M.updateConfig(types.dRules, lang)
+            M.updateConfig(types.hRules, lang)
+        end)
+    end
 end
 
 M.addToDictionary = function(command)
-	log.trace("addToDictionary")
-	local args = command.arguments[1].words
-	for lang, words in pairs(args) do
-		log.fmt_debug("Lang: %s Words: %s", vim.inspect(lang), vim.inspect(words))
-		exportFile(types.dict, lang, words)
-		vim.schedule(function()
-			M.updateConfig(types.dict, lang)
-		end)
-	end
+    log.trace("addToDictionary")
+    local args = command.arguments[1].words
+    for lang, words in pairs(args) do
+        log.fmt_debug("Lang: %s Words: %s", vim.inspect(lang), vim.inspect(words))
+        exportFile(types.dict, lang, words)
+        vim.schedule(function()
+            M.updateConfig(types.dict, lang)
+        end)
+    end
 end
 
 M.disableRules = function(command)
-	log.trace("disableRules")
-	local args = command.arguments[1].ruleIds
-	for lang, rules in pairs(args) do
-		log.fmt_debug("Lang: %s Rules: %s", vim.inspect(lang), vim.inspect(rules))
-		exportFile(types.dRules, lang, rules)
-		vim.schedule(function()
-			M.updateConfig(types.dRules, lang)
-		end)
-	end
+    log.trace("disableRules")
+    local args = command.arguments[1].ruleIds
+    for lang, rules in pairs(args) do
+        log.fmt_debug("Lang: %s Rules: %s", vim.inspect(lang), vim.inspect(rules))
+        exportFile(types.dRules, lang, rules)
+        vim.schedule(function()
+            M.updateConfig(types.dRules, lang)
+        end)
+    end
 end
 
 M.hideFalsePositives = function(command)
-	log.trace("hideFalsePositives")
-	local args = command.arguments[1].falsePositives
-	for lang, rules in pairs(args) do
-		log.fmt_debug("Lang: %s Rules: %s", vim.inspect(lang), vim.inspect(rules))
-		exportFile(types.hRules, lang, rules)
-		vim.schedule(function()
-			M.updateConfig(types.hRules, lang)
-		end)
-	end
+    log.trace("hideFalsePositives")
+    local args = command.arguments[1].falsePositives
+    for lang, rules in pairs(args) do
+        log.fmt_debug("Lang: %s Rules: %s", vim.inspect(lang), vim.inspect(rules))
+        exportFile(types.hRules, lang, rules)
+        vim.schedule(function()
+            M.updateConfig(types.hRules, lang)
+        end)
+    end
 end
 
 return M
