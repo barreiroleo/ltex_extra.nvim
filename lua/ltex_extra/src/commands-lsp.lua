@@ -82,9 +82,11 @@ M.reload = function(langs)
     langs = langs or package.loaded.ltex_extra.opts.load_langs
     for _, lang in pairs(langs) do
         log.fmt_trace("Loading %s", lang)
-        M.updateConfig(types.dict, lang)
-        M.updateConfig(types.dRules, lang)
-        M.updateConfig(types.hRules, lang)
+        vim.schedule(function()
+            M.updateConfig(types.dict, lang)
+            M.updateConfig(types.dRules, lang)
+            M.updateConfig(types.hRules, lang)
+        end)
     end
 end
 
@@ -94,7 +96,9 @@ M.addToDictionary = function(command)
     for lang, words in pairs(args) do
         log.fmt_debug("Lang: %s Words: %s", vim.inspect(lang), vim.inspect(words))
         exportFile(types.dict, lang, words)
-        M.updateConfig(types.dict, lang)
+        vim.schedule(function()
+            M.updateConfig(types.dict, lang)
+        end)
     end
 end
 
@@ -104,7 +108,9 @@ M.disableRules = function(command)
     for lang, rules in pairs(args) do
         log.fmt_debug("Lang: %s Rules: %s", vim.inspect(lang), vim.inspect(rules))
         exportFile(types.dRules, lang, rules)
-        M.updateConfig(types.dRules, lang)
+        vim.schedule(function()
+            M.updateConfig(types.dRules, lang)
+        end)
     end
 end
 
@@ -114,7 +120,9 @@ M.hideFalsePositives = function(command)
     for lang, rules in pairs(args) do
         log.fmt_debug("Lang: %s Rules: %s", vim.inspect(lang), vim.inspect(rules))
         exportFile(types.hRules, lang, rules)
-        M.updateConfig(types.hRules, lang)
+        vim.schedule(function()
+            M.updateConfig(types.hRules, lang)
+        end)
     end
 end
 
