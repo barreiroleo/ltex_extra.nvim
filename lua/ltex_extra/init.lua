@@ -12,7 +12,7 @@ M.opts = {}
 M.reload = function(...) require("ltex_extra.src.commands-lsp").reload(...) end
 
 M.setup = function(opts)
-    if opts.path then opts.path = opts.path .. "/" else opts.path = "" end
+    if opts.path then opts.path = vim.fs.normalize(opts.path .. "/") else opts.path = "" end
     M.opts = vim.tbl_deep_extend('force', default_opts, opts)
 
     local log = require("ltex_extra.src.log")
