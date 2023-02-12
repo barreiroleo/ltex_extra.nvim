@@ -11,12 +11,11 @@ local types = {
 
 local function catch_ltex()
     log.trace("catch_ltex")
-    local buf_clients = vim.lsp.buf_get_clients()
-    local client = nil
-    for _, lsp in pairs(buf_clients) do
-        if lsp.name == "ltex" then client = lsp end
-    end
-    return client
+    local buf_clients = vim.lsp.get_active_clients({
+        bufnr = vim.api.nvim_get_current_buf(),
+        name = "ltex",
+    })
+    return buf_clients[1]
 end
 
 local function get_settings(client)
