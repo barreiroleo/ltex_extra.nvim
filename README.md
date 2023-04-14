@@ -76,27 +76,38 @@ use { "barreiroleo/ltex-extra.nvim" }
 ```
 
 ## Configuration
-The recommended way to use `ltex-extra` is calling it from `ltex-ls` `on_attach` event.
-Next example use `nvim-config` typical launch server and default settings for `ltex-extra`, you can use it as template.
+Install the plugin with your favorite plugin manager, then add `require("ltex_extra").setup()` to your config.
+The plugin will set up the `ltex` language server for you (by calling the setup function of the server from `lspconfig` internally).
+So **you don't manually `require("lspconfig").ltex.setup`, as it can cause conflicts**.
+
+The configuration of the underlying `require("lspconfig").ltex.setup(...)` call is passed under the `server` key.
+Below is an example configuration; default config values are in the comments.
 
 *Notes: You can pass to set up only the arguments that you are interested in.
 At the moment, if you define stuff in `dictionary`, `disabledRules` and `hiddenFalsePositives` in your `ltex` settings, they haven't backup.*
 
 ```lua
-require("lspconfig").ltex.setup {
-    capabilities = your_capabilities,
-    on_attach = function(client, bufnr)
-        -- your other on_attach functions.
-        require("ltex_extra").setup{
-            load_langs = { "es-AR", "en-US" }, -- table <string> : languages for witch dictionaries will be loaded
-            init_check = true, -- boolean : whether to load dictionaries on startup
-            path = nil, -- string : path to store dictionaries. Relative path uses current working directory
-            log_level = "none", -- string : "none", "trace", "debug", "info", "warn", "error", "fatal"
-        }
-    end,
-    settings = {
+require("ltex_extra").setup{
+    -- table <string> : languages for witch dictionaries will be loaded
+    -- Default : {}
+    load_langs = { "es-AR", "en-US" },
+    -- boolean : whether to load dictionaries on startup
+    -- default : true
+    init_check = true,
+    -- string : path to store dictionaries. Relative path are based off the current working directory
+    -- Default : nil = the current working directory
+    path = "~/.config/ltex",
+    -- string : "none", "trace", "debug", "info", "warn", "error", "fatal"
+    -- Default : "none"
+    log_level = "none",
+    -- table : configurations of the ltex language server
+    server = {
+        capabilities = your_capabilities,
+        on_attach = function(client, bufnr)
+            -- Your on_attach
+        end,
         ltex = {
-            -- your settings.
+            -- your server settings
         }
     }
 }
