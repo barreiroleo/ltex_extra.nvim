@@ -1,4 +1,4 @@
-local log = require("ltex_extra.src.log")
+local log = require("ltex_extra.utils.log")
 
 local exportFile = require("ltex_extra.src.utils").exportFile
 local loadFile = require("ltex_extra.src.utils").loadFile

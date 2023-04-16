@@ -1,8 +1,8 @@
 local default_opts = {
-    load_langs = {}, -- table <string> : language for witch dictionaries will be loaded
-    init_check = true, -- boolean : whether to load dictionaries on startup
-    path = nil, -- string : path to store dictionaries. Relative path uses current working directory
+    init_check = true,  -- boolean : whether to load dictionaries on startup
+    load_langs = {},    -- table <string> : language for witch dictionaries will be loaded
     log_level = "none", -- string : "none", "trace", "debug", "info", "warn", "error", "fatal"
+    path = "",          -- string : path to store dictionaries. Relative path uses current working directory
     server = {},
 }
 
@@ -15,17 +15,11 @@ M.reload = function(...)
 end
 
 M.setup = function(opts)
+    opts = vim.tbl_deep_extend("force", default_opts, opts or {})
     local log = require("ltex_extra.src.log")
 
-    if opts.path then
-        opts.path = vim.fs.normalize(opts.path .. "/")
-    else
-        opts.path = ""
-    end
+    opts.path = vim.fs.normalize(opts.path .. "/")
 
-    if not opts.server then
-        opts.server = {}
-    end
     local on_attach = opts.server.on_attach
     opts.server.on_attach = function(...)
         log.trace("Add commands to lsp")
