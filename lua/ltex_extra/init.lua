@@ -1,62 +1,47 @@
-local default_opts = {
+local M = {}
+
+M.opts = {
     init_check = true,  -- boolean : whether to load dictionaries on startup
     load_langs = {},    -- table <string> : language for witch dictionaries will be loaded
     log_level = "none", -- string : "none", "trace", "debug", "info", "warn", "error", "fatal"
     path = "",          -- string : path to store dictionaries. Relative path uses current working directory
-    server = {},
+    server = nil,
 }
 
-local M = {}
+local function register_lsp_commands()
+    vim.lsp.commands["_ltex.addToDictionary"] = require("ltex_extra.src.commands-lsp").addToDictionary
+    vim.lsp.commands["_ltex.hideFalsePositives"] = require("ltex_extra.src.commands-lsp").hideFalsePositives
+    vim.lsp.commands["_ltex.disableRules"] = require("ltex_extra.src.commands-lsp").disableRules
+end
 
-M.opts = {}
+local function call_ltex(server_opts)
+    local ok, lspconfig = pcall(require, "lspconfig")
+    if not ok then
+        error("LTeX_extra: can't initialize ltex lspconfig module not found")
+    end
+    lspconfig["ltex"].setup(server_opts)
+end
 
 M.reload = function(...)
     require("ltex_extra.src.commands-lsp").reload(...)
 end
 
 M.setup = function(opts)
-    opts = vim.tbl_deep_extend("force", default_opts, opts or {})
-    local log = require("ltex_extra.src.log")
+    opts = vim.tbl_deep_extend("force", M.opts, opts or {})
 
-    opts.path = vim.fs.normalize(opts.path .. "/")
+    opts.path = vim.fs.normalize(opts.path) .. "/"
 
-    local on_attach = opts.server.on_attach
-    opts.server.on_attach = function(...)
-        log.trace("Add commands to lsp")
-        vim.lsp.commands["_ltex.addToDictionary"] = require("ltex_extra.src.commands-lsp").addToDictionary
-        vim.lsp.commands["_ltex.hideFalsePositives"] = require("ltex_extra.src.commands-lsp").hideFalsePositives
-        vim.lsp.commands["_ltex.disableRules"] = require("ltex_extra.src.commands-lsp").disableRules
-        if on_attach then
-            on_attach(...)
-        end
-        log.trace("Inital load files")
-        if M.opts.init_check == true then
-            M.reload(M.opts.load_langs)
-        end
+    if opts.server then
+        call_ltex(opts.server)
     end
 
-    M.opts = vim.tbl_deep_extend("force", default_opts, opts)
-    log.debug("Opts: " .. vim.inspect(M.opts))
+    register_lsp_commands()
 
-    if require("ltex_extra.src.commands-lsp").catch_ltex() then
-        vim.notify(
-            [[Newer version of LTeX_extra will set up lspconfig for you.
-The old pattern of setting up in on_attach is deprecated.
-Please remove any manual setup of ltex server.]],
-            vim.log.levels.WARN
-        )
-        opts.server.on_attach()
-        return
+    if opts.init_check == true then
+        M.reload(opts.load_langs)
     end
 
-    local ok, lspconfig = pcall(require, "lspconfig")
-    if not ok then
-        vim.notify("LTeX_extra setup terminates because lspconfig module is not found", vim.log.levels.ERROR)
-        return
-    end
-
-    log.trace("Setup lspconfig")
-    lspconfig["ltex"].setup(opts.server)
+    M.opts = opts
 end
 
 return M

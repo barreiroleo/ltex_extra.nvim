@@ -6,3 +6,5 @@ globals:
     any: true
   P:
     any: true
+  LOG:
+    any: true
