@@ -13,7 +13,7 @@ end
 local opts = require("ltex_extra").opts
 opts.path = vim.fn.expand("~") .. "/.local/share/ltex"
 ltex_extra.setup(opts)
--- LOG(package.loaded.ltex_extra)
+LOG(package.loaded.ltex_extra)
 package.loaded.ltex_extra = nil
 
 -- TEST: LTeX server init
@@ -22,3 +22,17 @@ opts.server = {}
 ltex_extra.setup(opts)
 LOG(package.loaded.ltex_extra)
 package.loaded.ltex_extra = nil
+
+-- TEST: Lsp commands
+vim.lsp.commands["_ltex.addToDictionary"] = require("ltex_extra.commands-lsp").addToDictionary
+vim.lsp.buf.execute_command({
+    command = "_ltex.addToDictionary",
+    arguments = {
+        arguments = { {
+            uri = "file:///home/leonardo/develop/ltex_extra.nvim/test/main.md",
+            words = { ["es-AR"] = { "This" } }
+        } },
+        command = "_ltex.addToDictionary",
+        title = "Add 'This' to dictionary"
+    }
+})

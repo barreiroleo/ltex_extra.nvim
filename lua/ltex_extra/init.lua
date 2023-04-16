@@ -9,9 +9,9 @@ M.opts = {
 }
 
 local function register_lsp_commands()
-    vim.lsp.commands["_ltex.addToDictionary"] = require("ltex_extra.src.commands-lsp").addToDictionary
-    vim.lsp.commands["_ltex.hideFalsePositives"] = require("ltex_extra.src.commands-lsp").hideFalsePositives
-    vim.lsp.commands["_ltex.disableRules"] = require("ltex_extra.src.commands-lsp").disableRules
+    vim.lsp.commands["_ltex.addToDictionary"] = require("ltex_extra.commands-lsp").addToDictionary
+    vim.lsp.commands["_ltex.hideFalsePositives"] = require("ltex_extra.commands-lsp").hideFalsePositives
+    vim.lsp.commands["_ltex.disableRules"] = require("ltex_extra.commands-lsp").disableRules
 end
 
 local function call_ltex(server_opts)
@@ -22,26 +22,39 @@ local function call_ltex(server_opts)
     lspconfig["ltex"].setup(server_opts)
 end
 
+local function first_load()
+    if M.opts.init_check == true then
+        M.reload(M.opts.load_langs)
+    end
+end
+
+local function extend_ltex_on_attach(on_attach)
+    if on_attach then
+        return function(...)
+            on_attach(...)
+            first_load()
+        end
+    else
+        return first_load
+    end
+end
+
 M.reload = function(...)
-    require("ltex_extra.src.commands-lsp").reload(...)
+    require("ltex_extra.commands-lsp").reload(...)
 end
 
 M.setup = function(opts)
-    opts = vim.tbl_deep_extend("force", M.opts, opts or {})
-
-    opts.path = vim.fs.normalize(opts.path) .. "/"
-
-    if opts.server then
-        call_ltex(opts.server)
-    end
+    M.opts = vim.tbl_deep_extend("force", M.opts, opts or {})
+    M.opts.path = vim.fs.normalize(M.opts.path) .. "/"
 
     register_lsp_commands()
 
-    if opts.init_check == true then
-        M.reload(opts.load_langs)
+    if M.opts.server then
+        M.opts.server.on_attach = extend_ltex_on_attach(M.opts.server.on_attach)
+        call_ltex(M.opts.server)
+    else
+        first_load()
     end
-
-    M.opts = opts
 end
 
 return M
