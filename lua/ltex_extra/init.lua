@@ -5,7 +5,7 @@ M.opts = {
     load_langs = {},    -- table <string> : language for witch dictionaries will be loaded
     log_level = "none", -- string : "none", "trace", "debug", "info", "warn", "error", "fatal"
     path = "",          -- string : path to store dictionaries. Relative path uses current working directory
-    server = nil,
+    server_opts = nil,
 }
 
 local function register_lsp_commands()
@@ -49,9 +49,9 @@ M.setup = function(opts)
 
     register_lsp_commands()
 
-    if M.opts.server then
-        M.opts.server.on_attach = extend_ltex_on_attach(M.opts.server.on_attach)
-        call_ltex(M.opts.server)
+    if M.opts.server_opts then
+        M.opts.server_opts.on_attach = extend_ltex_on_attach(M.opts.server_opts.on_attach)
+        call_ltex(M.opts.server_opts)
     else
         first_load()
     end

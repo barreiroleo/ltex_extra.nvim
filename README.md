@@ -4,7 +4,7 @@
 # LTeX_extra.nvim
 <h6>Provides external LTeX file handling (off-spec lsp) and other functions.</h6>
 <h6>🚧 This plugin is on development, expect some changes</h6>
-<h6>Developed on Nvim stable v0.8</h6>
+<h6>Developed on Nvim v0.9, tested on v0.10</h6>
 
 
 [![Lua](https://img.shields.io/badge/Lua-blue.svg?style=for-the-badge&logo=lua)](http://www.lua.org)
@@ -13,7 +13,8 @@
 <!-- [![Neovim Nightly](https://img.shields.io/badge/Neovim%20Nightly-green.svg?style=for-the-badge&logo=neovim)](https://neovim.io) -->
 </div>
 
-`LTeX_extra` is a plugin for Neovim that provide the functions that are called on LSP code actions by `ltex-ls`: [`addToDictionary`](https://valentjn.github.io/ltex/ltex-ls/server-usage.html#_ltexhidefalsepositives-client),
+`LTeX_extra` is a plugin for Neovim that provide the functions that are called on LSP code actions by `ltex-ls`:
+[`addToDictionary`](https://valentjn.github.io/ltex/ltex-ls/server-usage.html#_ltexhidefalsepositives-client),
 [`disableRule`](https://valentjn.github.io/ltex/ltex-ls/server-usage.html#_ltexdisablerules-client),
 [`hideFalsePositive`](https://valentjn.github.io/ltex/ltex-ls/server-usage.html#_ltexaddtodictionary-client).
 Also, `LTeX_extra` provide extra [features](#features).
@@ -43,13 +44,6 @@ Check the docs: [neovim suggested configuration](https://github.com/neovim/nvim-
 
 https://user-images.githubusercontent.com/48270301/177694689-b6b12b4a-3981-47fe-aa88-567697f797bd.mp4
 
-#### Lspsaga
-Some users reported an issue with code actions when called from lspsaga. I'm not using lspsaga, so PR are very welcome.
-
-https://user-images.githubusercontent.com/39244876/201530888-077e76ad-211c-408f-80dc-89ba59751532.mov
-
-_Thanks to @felipejoribeiro for the screenrecording_
-
 ### Custom export path
 Config you path, give you compatibility with official vscode extension.
 
@@ -61,59 +55,86 @@ Autoload exported data for required languages.
 https://user-images.githubusercontent.com/48270301/177694724-736159ab-c202-4325-ad23-405c76676b79.mp4
 
 ### Update on demand
-Reload exported data on demand:
+Reload exported data on demand: `require("ltex_extra").reload()`
 
 https://user-images.githubusercontent.com/48270301/177694740-bc8bdb4c-0f6b-4f63-98af-54ec23196f27.mp4
 
 ## Installation
-This plugin requires an instance of `ltex_ls` language server attached in the current buffer.
+This plugin requires an instance of `ltex_ls` language server available to attach.
+*[`ltex-ls`](https://github.com/valentjn/ltex-ls) is available at [`mason.nvim`](https://github.com/williamboman/mason.nvim).*
 
-*Note: [`ltex-ls`](https://github.com/valentjn/ltex-ls) is available by [`nvim-lsp-installer`](https://github.com/williamboman/nvim-lsp-installer).*
+Install the plugin with your favorite plugin manager using `{"barreiroleo/ltex-extra.nvim"}`.
+Then add `require("ltex_extra").setup()` to your config in a proper place.
 
-### Packer
-```lua
-use { "barreiroleo/ltex-extra.nvim" }
-```
-
-## Configuration
-Install the plugin with your favorite plugin manager, then add `require("ltex_extra").setup()` to your config.
-The plugin will set up the `ltex` language server for you (by calling the setup function of the server from `lspconfig` internally).
-So **you don't manually `require("lspconfig").ltex.setup`, as it can cause conflicts**.
-
-The configuration of the underlying `require("lspconfig").ltex.setup(...)` call is passed under the `server` key.
-Below is an example configuration; default config values are in the comments.
-
-*Notes: You can pass to set up only the arguments that you are interested in.
-At the moment, if you define stuff in `dictionary`, `disabledRules` and `hiddenFalsePositives` in your `ltex` settings, they haven't backup.*
-
-```lua
-require("ltex_extra").setup{
-    -- table <string> : languages for witch dictionaries will be loaded
-    -- Default : {}
-    load_langs = { "es-AR", "en-US" },
-    -- boolean : whether to load dictionaries on startup
-    -- default : true
-    init_check = true,
-    -- string : path to store dictionaries. Relative path are based off the current working directory
-    -- Default : nil = the current working directory
-    path = "~/.config/ltex",
-    -- string : "none", "trace", "debug", "info", "warn", "error", "fatal"
-    -- Default : "none"
-    log_level = "none",
-    -- table : configurations of the ltex language server
-    server = {
+We suggest to you two ways:
+- Call the `setup` from `on_attach` function of your server. Example with
+`lspconfig`, minor changes are required for `mason` handler:
+    ```lua
+    require("lspconfig").ltex.setup {
         capabilities = your_capabilities,
         on_attach = function(client, bufnr)
-            -- Your on_attach
+            -- rest of your on_attach process.
+            require("ltex_extra").setup { your_opts }
         end,
-        ltex = {
-            -- your server settings
+        settings = {
+            ltex = { your settings }
         }
     }
+    ```
+- Use the handler which `ltex_extra` provide to call the server. Example of use with `lazy.nvim`:
+
+    ```lua
+    return {
+        "barreiroleo/ltex_extra.nvim",
+        ft = { "markdown", "tex" },
+        dependencies = { "neovim/nvim-lspconfig" },
+        -- yes, you can use the opts field, just I'm showing the setup explicitly
+        config = function()
+            require("ltex_extra").setup {
+                your_ltex_extra_opts,
+                server_opts = {
+                    capabilities = your_capabilities,
+                    on_attach = function(client, bufnr)
+                        -- your on_attach process
+                    end,
+                    settings = {
+                        ltex = { your settings }
+                    }
+                },
+            }
+        end
+    }
+    ```
+
+## Configuration
+
+Here are the settings available on `ltex_extra`. You don't need explicit define each
+one, just modify what you need.
+
+*Notes: You can pass to set up only the arguments that you are interested in.
+At the moment, if you define stuff in `dictionary`, `disabledRules` and
+`hiddenFalsePositives` in your `ltex` settings, they haven't backup.*
+
+```lua
+require("ltex_extra").setup {
+    -- table <string> : languages for witch dictionaries will be loaded, e.g. { "es-AR", "en-US" }
+    -- https://valentjn.github.io/ltex/supported-languages.html#natural-languages
+    load_langs = {}, -- en-US as default
+    -- boolean : whether to load dictionaries on startup
+    init_check = true,
+    -- string : relative or absolute paths to store dictionaries
+    -- e.g. subfolder in current working directory: ".ltex"
+    -- e.g. shared files for all projects :  vim.fn.expand("~") .. "/.local/share/ltex"
+    path = "", -- current working directory
+    -- string : "none", "trace", "debug", "info", "warn", "error", "fatal"
+    log_level = "none",
+    -- table : configurations of the ltex language server.
+    -- Only if you are calling the server from ltex_extra
+    server_opts = nil
 }
 ```
 
-### Contributors
+## Contributors
 
 Thanks to these people for your time, effort and ideas.
 
@@ -121,9 +142,12 @@ Thanks to these people for your time, effort and ideas.
   <img src="https://contrib.rocks/image?repo=barreiroleo/ltex_extra.nvim" />
 </a>
 
-## To-do list
-- [ ] Write the docs.
-- [x] Add capability for create dictionary, disabledRules and hiddenFalsePositives keys in LTeX settings.
-- [x] Add path specification for files in setup.
-- [x] Add capability for read the existing files in path.
-- [ ] Abort initial load if the files doesn't exist.
+## Issues
+- Lspsaga:
+
+    Some users reported an issue with code actions when called from lspsaga.
+    I'm not using lspsaga, so PR are very welcome.
+
+    https://user-images.githubusercontent.com/39244876/201530888-077e76ad-211c-408f-80dc-89ba59751532.mov
+
+    _Thanks to @felipejoribeiro for the screenrecording_
