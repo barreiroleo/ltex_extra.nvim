@@ -1,0 +1,7 @@
+std="lua51+vim"
+
+[rules]
+global_usage = "warn"
+multiple_statements = "allow"
+shadowing = "warn"
+unused_variable = "warn"

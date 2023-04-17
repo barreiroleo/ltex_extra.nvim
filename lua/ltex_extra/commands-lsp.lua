@@ -1,23 +1,13 @@
-local log = require("ltex_extra.src.log")
+local log = require("ltex_extra.utils.log")
 
-local exportFile = require("ltex_extra.src.utils").exportFile
-local loadFile   = require("ltex_extra.src.utils").loadFile
+local exportFile = require("ltex_extra.utils.fs").exportFile
+local loadFile = require("ltex_extra.utils.fs").loadFile
 
 local types = {
     ["dict"] = "dictionary",
     ["dRules"] = "disabledRules",
-    ["hRules"] = "hiddenFalsePositives"
+    ["hRules"] = "hiddenFalsePositives",
 }
-
-local function catch_ltex()
-    log.trace("catch_ltex")
-    local buf_clients = vim.lsp.buf_get_clients()
-    local client = nil
-    for _, lsp in pairs(buf_clients) do
-        if lsp.name == "ltex" then client = lsp end
-    end
-    return client
-end
 
 local function get_settings(client)
     if not client.config.settings.ltex then
@@ -36,7 +26,7 @@ local function update_dictionary(client, lang)
     local settings = get_settings(client)
     settings.ltex.dictionary[lang] = loadFile(types.dict, lang)
     log.debug(vim.inspect(settings.ltex.dictionary))
-    return client.notify('workspace/didChangeConfiguration', settings)
+    return client.notify("workspace/didChangeConfiguration", settings)
 end
 
 local function update_disabledRules(client, lang)
@@ -44,7 +34,7 @@ local function update_disabledRules(client, lang)
     local settings = get_settings(client)
     settings.ltex.disabledRules[lang] = loadFile(types.dRules, lang)
     log.debug(vim.inspect(settings.ltex.disabledRules))
-    return client.notify('workspace/didChangeConfiguration', settings)
+    return client.notify("workspace/didChangeConfiguration", settings)
 end
 
 local function update_hiddenFalsePositive(client, lang)
@@ -52,14 +42,23 @@ local function update_hiddenFalsePositive(client, lang)
     local settings = get_settings(client)
     settings.ltex.hiddenFalsePositives[lang] = loadFile(types.hRules, lang)
     log.debug(vim.inspect(settings.ltex.hiddenFalsePositives))
-    return client.notify('workspace/didChangeConfiguration', settings)
+    return client.notify("workspace/didChangeConfiguration", settings)
 end
 
 local M = {}
 
-M.updateConfig = function(configtype, lang)
+function M.catch_ltex()
+    log.trace("catch_ltex")
+    local buf_clients = vim.lsp.get_active_clients({
+        bufnr = vim.api.nvim_get_current_buf(),
+        name = "ltex",
+    })
+    return buf_clients[1]
+end
+
+function M.updateConfig(configtype, lang)
     log.trace("updateConfig")
-    local client = catch_ltex()
+    local client = M.catch_ltex()
     if client then
         if configtype == types.dict then
             update_dictionary(client, lang)
@@ -72,12 +71,11 @@ M.updateConfig = function(configtype, lang)
             return vim.notify("Config type unknown")
         end
     else
-        log.fmt_error("Error catching ltex client")
-        return vim.notify("Error catching ltex client")
+        return error("Error catching ltex client",1)
     end
 end
 
-M.reload = function(langs)
+function M.reload(langs)
     log.trace("updateConfigFull")
     langs = langs or package.loaded.ltex_extra.opts.load_langs
     for _, lang in pairs(langs) do
@@ -90,7 +88,7 @@ M.reload = function(langs)
     end
 end
 
-M.addToDictionary = function(command)
+function M.addToDictionary(command)
     log.trace("addToDictionary")
     local args = command.arguments[1].words
     for lang, words in pairs(args) do
@@ -102,7 +100,7 @@ M.addToDictionary = function(command)
     end
 end
 
-M.disableRules = function(command)
+function M.disableRules(command)
     log.trace("disableRules")
     local args = command.arguments[1].ruleIds
     for lang, rules in pairs(args) do
@@ -114,7 +112,7 @@ M.disableRules = function(command)
     end
 end
 
-M.hideFalsePositives = function(command)
+function M.hideFalsePositives(command)
     log.trace("hideFalsePositives")
     local args = command.arguments[1].falsePositives
     for lang, rules in pairs(args) do

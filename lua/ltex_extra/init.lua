@@ -1,31 +1,59 @@
 local M = {}
 
-local default_opts = {
-    load_langs = { "es-AR", "en-US" }, -- table <string> : language for witch dictionaries will be loaded
-    init_check = true, -- boolean : whether to load dictionaries on startup
-    path = nil, -- string : path to store dictionaries. Relative path uses current working directory
+M.opts = {
+    init_check = true,  -- boolean : whether to load dictionaries on startup
+    load_langs = {},    -- table <string> : language for witch dictionaries will be loaded
     log_level = "none", -- string : "none", "trace", "debug", "info", "warn", "error", "fatal"
+    path = "",          -- string : path to store dictionaries. Relative path uses current working directory
+    server_opts = nil,
 }
 
-M.opts = {}
+local function register_lsp_commands()
+    vim.lsp.commands["_ltex.addToDictionary"] = require("ltex_extra.commands-lsp").addToDictionary
+    vim.lsp.commands["_ltex.hideFalsePositives"] = require("ltex_extra.commands-lsp").hideFalsePositives
+    vim.lsp.commands["_ltex.disableRules"] = require("ltex_extra.commands-lsp").disableRules
+end
 
-M.reload = function(...) require("ltex_extra.src.commands-lsp").reload(...) end
+local function call_ltex(server_opts)
+    local ok, lspconfig = pcall(require, "lspconfig")
+    if not ok then
+        error("LTeX_extra: can't initialize ltex lspconfig module not found")
+    end
+    lspconfig["ltex"].setup(server_opts)
+end
 
-M.setup = function(opts)
-    if opts.path then opts.path = vim.fs.normalize(opts.path .. "/") else opts.path = "" end
-    M.opts = vim.tbl_deep_extend('force', default_opts, opts)
-
-    local log = require("ltex_extra.src.log")
-    log.debug("Opts: " .. vim.inspect(M.opts))
-
-    log.trace("Add commands to lsp")
-    vim.lsp.commands['_ltex.addToDictionary']    = require("ltex_extra.src.commands-lsp").addToDictionary
-    vim.lsp.commands['_ltex.hideFalsePositives'] = require("ltex_extra.src.commands-lsp").hideFalsePositives
-    vim.lsp.commands['_ltex.disableRules']       = require("ltex_extra.src.commands-lsp").disableRules
-
-    log.trace("Inital load files")
+local function first_load()
     if M.opts.init_check == true then
         M.reload(M.opts.load_langs)
+    end
+end
+
+local function extend_ltex_on_attach(on_attach)
+    if on_attach then
+        return function(...)
+            on_attach(...)
+            first_load()
+        end
+    else
+        return first_load
+    end
+end
+
+M.reload = function(...)
+    require("ltex_extra.commands-lsp").reload(...)
+end
+
+M.setup = function(opts)
+    M.opts = vim.tbl_deep_extend("force", M.opts, opts or {})
+    M.opts.path = vim.fs.normalize(M.opts.path) .. "/"
+
+    register_lsp_commands()
+
+    if M.opts.server_opts then
+        M.opts.server_opts.on_attach = extend_ltex_on_attach(M.opts.server_opts.on_attach)
+        call_ltex(M.opts.server_opts)
+    else
+        first_load()
     end
 end
 

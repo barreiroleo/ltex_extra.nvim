@@ -1,11 +1,11 @@
-local log  = require("ltex_extra.src.log")
+local log  = require("ltex_extra.utils.log")
 local path = package.loaded.ltex_extra.opts.path
 
 local M = {}
 
 -- Returns the filename for a type and lang required.
 M.joinPath = function(type, lang)
-    return path .. table.concat({ "ltex", type, lang, "txt" }, ".")
+    return vim.fs.normalize(path .. table.concat({ "ltex", type, lang, "txt" }, "."))
 end
 
 -- Check if path exist. Apply for files and dirs.

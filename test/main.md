@@ -8,3 +8,5 @@ This rules is going to be disabled.
 Esto es un errorr.
 esta oración debe comenzar con mayúsculas.
 Esta regla sera desactivada.
+
+=require("ltex_extra").reload()
