@@ -1,10 +1,11 @@
 local M = {}
 
 M.opts = {
-    init_check = true,  -- boolean : whether to load dictionaries on startup
-    load_langs = {},    -- table <string> : language for witch dictionaries will be loaded
-    log_level = "none", -- string : "none", "trace", "debug", "info", "warn", "error", "fatal"
-    path = "",          -- string : path to store dictionaries. Relative path uses current working directory
+    init_check = true,   -- boolean : whether to load dictionaries on startup
+    load_langs = {},     -- table <string> : language for witch dictionaries will be loaded
+    log_level = "none",  -- string : "none", "trace", "debug", "info", "warn", "error", "fatal"
+    path = "",           -- string : path to store dictionaries. Relative path uses current working directory
+    server_start = true, -- boolean : Enable the call to ltex. Usefull for migration and test
     server_opts = nil,
 }
 
@@ -49,7 +50,7 @@ M.setup = function(opts)
 
     register_lsp_commands()
 
-    if M.opts.server_opts then
+    if M.opts.server_opts and M.opts.server_start then
         M.opts.server_opts.on_attach = extend_ltex_on_attach(M.opts.server_opts.on_attach)
         call_ltex(M.opts.server_opts)
     else
