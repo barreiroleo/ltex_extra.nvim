@@ -46,7 +46,7 @@ end
 
 M.setup = function(opts)
     M.opts = vim.tbl_deep_extend("force", M.opts, opts or {})
-    M.opts.path = vim.fs.normalize(M.opts.path) .. "/"
+    M.opts.path = vim.fs.normalize(M.opts.path)
 
     register_lsp_commands()
 

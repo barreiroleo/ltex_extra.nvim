@@ -1,11 +1,22 @@
-local log  = require("ltex_extra.utils.log")
-local path = package.loaded.ltex_extra.opts.path
+local log = require("ltex_extra.utils.log")
+local config_path = package.loaded.ltex_extra.opts.path
 
 local M = {}
 
+-- Returns path to the directory where ltex files should be located.
+M.path = function()
+    -- Check if the absolute path the user has provided is valid
+    if config_path ~= "" and M.path_exist(config_path) then
+        return config_path .. "/"
+    else
+        -- Assume relative path so append to the cwd
+        return vim.fs.normalize(vim.loop.cwd() .. "/" .. config_path) .. "/"
+    end
+end
+
 -- Returns the filename for a type and lang required.
 M.joinPath = function(type, lang)
-    return vim.fs.normalize(path .. table.concat({ "ltex", type, lang, "txt" }, "."))
+    return vim.fs.normalize(M.path() .. table.concat({ "ltex", type, lang, "txt" }, "."))
 end
 
 -- Check if path exist. Apply for files and dirs.
