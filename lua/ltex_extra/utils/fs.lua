@@ -7,6 +7,9 @@ local M = {}
 M.set_path = function()
     log.trace("Setting ltex files path")
     local path = package.loaded.ltex_extra.opts.path
+    if path == "" then
+        path = assert(uv.cwd())
+    end
     path = vim.fs.normalize(path)
     if M.check_dir(path) then
         -- Get the fullpath in case it is relative
