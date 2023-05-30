@@ -1,11 +1,12 @@
 local M = {}
 
 M.opts = {
-    init_check = true,   -- boolean : whether to load dictionaries on startup
-    load_langs = {},     -- table <string> : language for witch dictionaries will be loaded
-    log_level = "none",  -- string : "none", "trace", "debug", "info", "warn", "error", "fatal"
-    path = "",           -- string : path to store dictionaries. Relative path uses current working directory
-    server_start = true, -- boolean : Enable the call to ltex. Usefull for migration and test
+    init_check = true,    -- boolean : whether to load dictionaries on startup
+    load_langs = {},      -- table <string> : language for witch dictionaries will be loaded
+    log_level = "none",   -- string : "none", "trace", "debug", "info", "warn", "error", "fatal"
+    path = "",            -- string : path to store dictionaries
+    file_watcher = false, -- boolean : whether to refresh ltex when files are manually modified
+    server_start = true,  -- boolean : Enable the call to ltex. Useful for migration and test
     server_opts = nil,
 }
 
@@ -24,6 +25,9 @@ local function call_ltex(server_opts)
 end
 
 local function first_load()
+    local fs = require("ltex_extra.utils.fs")
+    fs.set_path()
+    fs.init_watcher()
     if M.opts.init_check == true then
         M.reload(M.opts.load_langs)
     end

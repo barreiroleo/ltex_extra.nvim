@@ -50,14 +50,13 @@ local M = {}
 function M.catch_ltex()
     log.trace("catch_ltex")
     local buf_clients = vim.lsp.get_active_clients({
-        bufnr = vim.api.nvim_get_current_buf(),
         name = "ltex",
     })
     return buf_clients[1]
 end
 
 function M.updateConfig(configtype, lang)
-    log.trace("updateConfig")
+    log.trace("updateConfig", configtype, lang)
     local client = M.catch_ltex()
     if client then
         if configtype == types.dict then
@@ -71,7 +70,7 @@ function M.updateConfig(configtype, lang)
             return vim.notify("Config type unknown")
         end
     else
-        return error("Error catching ltex client",1)
+        return error("Error catching ltex client", 1)
     end
 end
 
