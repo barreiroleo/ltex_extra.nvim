@@ -111,7 +111,7 @@ end
 -- Write specified content into a file.
 M.writeFile = function(filename, lines)
     log.trace("Writing", filename, lines)
-    if not M.path_exist(filename) then
+    if package.loaded.ltex_extra.opts.file_watcher and not M.path_exist(filename) then
         -- As this is creating a new file, it will trigger the file watcher
         -- Increment the skip counter to ensure we don't reload config
         M.watcher_skip = M.watcher_skip + 1

@@ -27,7 +27,9 @@ end
 local function first_load()
     local fs = require("ltex_extra.utils.fs")
     fs.set_path()
-    fs.init_watcher()
+    if M.opts.file_watcher then
+        fs.init_watcher()
+    end
     if M.opts.init_check == true then
         M.reload(M.opts.load_langs)
     end
