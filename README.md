@@ -117,7 +117,7 @@ At the moment, if you define stuff in `dictionary`, `disabledRules` and
 
 ```lua
 require("ltex_extra").setup {
-    -- table <string> : languages for witch dictionaries will be loaded, e.g. { "es-AR", "en-US" }
+    -- table <string> : languages for which dictionaries will be loaded, e.g. { "es-AR", "en-US" }
     -- https://valentjn.github.io/ltex/supported-languages.html#natural-languages
     load_langs = {}, -- en-US as default
     -- boolean : whether to load dictionaries on startup
@@ -126,6 +126,11 @@ require("ltex_extra").setup {
     -- e.g. subfolder in current working directory: ".ltex"
     -- e.g. shared files for all projects :  vim.fn.expand("~") .. "/.local/share/ltex"
     path = "", -- current working directory
+    -- boolean : whether or not to enable the file watcher
+    -- watches ltex files and automatically refreshes the server if they are manually modified
+    -- WARNING only enable this option if your set path is exclusively for ltex files
+    -- otherwise the file watcher will refresh for changes made to irrelevant files
+    file_watcher = false,
     -- string : "none", "trace", "debug", "info", "warn", "error", "fatal"
     log_level = "none",
     -- table : configurations of the ltex language server.
