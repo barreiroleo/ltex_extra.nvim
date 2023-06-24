@@ -122,10 +122,10 @@ require("ltex_extra").setup {
     load_langs = {}, -- en-US as default
     -- boolean : whether to load dictionaries on startup
     init_check = true,
-    -- string : relative or absolute paths to store dictionaries
-    -- e.g. subfolder in current working directory: ".ltex"
-    -- e.g. shared files for all projects :  vim.fn.expand("~") .. "/.local/share/ltex"
-    path = "", -- current working directory
+    -- string : relative or absolute path to store dictionaries
+    -- e.g. subfolder in the project root or the current working directory: ".ltex"
+    -- e.g. shared files for all projects:  vim.fn.expand("~") .. "/.local/share/ltex"
+    path = "", -- project root or current working directory
     -- string : "none", "trace", "debug", "info", "warn", "error", "fatal"
     log_level = "none",
     -- table : configurations of the ltex language server.

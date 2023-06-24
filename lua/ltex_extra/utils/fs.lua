@@ -1,4 +1,5 @@
 local log = require("ltex_extra.utils.log")
+local server_opts = require("ltex_extra").opts.server_opts
 local config_path = package.loaded.ltex_extra.opts.path
 local uv = vim.loop
 
@@ -9,10 +10,12 @@ M.path = function()
     -- Check if the absolute path the user has provided is valid
     if config_path ~= "" and M.path_exist(config_path) then
         return config_path .. "/"
-    else
-        -- Assume relative path so append to the cwd
-        return vim.fs.normalize(uv.cwd() .. "/" .. config_path) .. "/"
     end
+
+    local root_dir = server_opts and server_opts.root_dir or uv.cwd()
+
+    -- Assume relative path and append to the root dir
+    return vim.fs.normalize(root_dir .. "/" .. config_path) .. "/"
 end
 
 -- Returns the filename for a type and lang required.
