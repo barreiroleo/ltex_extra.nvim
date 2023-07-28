@@ -7,14 +7,14 @@ local M = {}
 
 -- Returns path to the directory where ltex files should be located.
 M.path = function()
-    -- Check if the absolute path the user has provided is valid
-    if config_path ~= "" and M.path_exist(config_path) then
+    -- Check if the path is absolute.
+    if config_path:sub(1,1) == "/" then
         return config_path .. "/"
     end
 
     local root_dir = server_opts and server_opts.root_dir or uv.cwd()
 
-    -- Assume relative path and append to the root dir
+    -- Assume relative path and append to the root dir.
     return vim.fs.normalize(root_dir .. "/" .. config_path) .. "/"
 end
 
