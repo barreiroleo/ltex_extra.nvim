@@ -1,26 +1,25 @@
 local log = require("ltex_extra.utils.log")
-local server_opts = require("ltex_extra").opts.server_opts
 local config_path = package.loaded.ltex_extra.opts.path
 local uv = vim.loop
 
 local M = {}
 
 -- Returns path to the directory where ltex files should be located.
-M.path = function()
+M.path = function(root_dir)
+    root_dir = root_dir or uv.cwd()
+
     -- Check if the path is absolute.
-    if config_path:sub(1,1) == "/" then
+    if config_path:sub(1, 1) == "/" then
         return config_path .. "/"
     end
-
-    local root_dir = server_opts and server_opts.root_dir or uv.cwd()
 
     -- Assume relative path and append to the root dir.
     return vim.fs.normalize(root_dir .. "/" .. config_path) .. "/"
 end
 
 -- Returns the filename for a type and lang required.
-M.joinPath = function(type, lang)
-    return vim.fs.normalize(M.path() .. table.concat({ "ltex", type, lang, "txt" }, "."))
+M.joinPath = function(root_dir, type, lang)
+    return vim.fs.normalize(M.path(root_dir) .. table.concat({ "ltex", type, lang, "txt" }, "."))
 end
 
 -- Check if path exist. Apply for files and dirs.
@@ -73,10 +72,10 @@ M.writeFile = function(filename, lines)
 end
 
 -- Export ltex data depends on the type and lang especified.
-M.exportFile = function(type, lang, lines)
+M.exportFile = function(root_dir, type, lang, lines)
     log.trace("Exporting ", type, lang, lines)
-    local filename = M.joinPath(type, lang)
-    if M.check_dir(M.path()) then
+    local filename = M.joinPath(root_dir, type, lang)
+    if M.check_dir(M.path(root_dir)) then
         M.writeFile(filename, lines)
     else
         log.vimwarn("Fail export " .. filename)
@@ -123,10 +122,10 @@ end
 
 -- Return the content of a required type and lang.
 -- If the file doesn't exist, return empty table.
-M.loadFile = function(type, lang)
+M.loadFile = function(root_dir, type, lang)
     log.trace("Loading ", type, lang)
     local content = {}
-    local filename = M.joinPath(type, lang)
+    local filename = M.joinPath(root_dir, type, lang)
     if M.path_exist(filename) then
         content = M.readFile(filename)
     else

@@ -24,7 +24,8 @@ end
 local function update_dictionary(client, lang)
     log.trace("update_dictionary")
     local settings = get_settings(client)
-    settings.ltex.dictionary[lang] = loadFile(types.dict, lang)
+    local root_dir = client.config.root_dir
+    settings.ltex.dictionary[lang] = loadFile(root_dir, types.dict, lang)
     log.debug(vim.inspect(settings.ltex.dictionary))
     return client.notify("workspace/didChangeConfiguration", settings)
 end
@@ -32,7 +33,8 @@ end
 local function update_disabledRules(client, lang)
     log.trace("update_disabledRules")
     local settings = get_settings(client)
-    settings.ltex.disabledRules[lang] = loadFile(types.dRules, lang)
+    local root_dir = client.config.root_dir
+    settings.ltex.disabledRules[lang] = loadFile(root_dir, types.dRules, lang)
     log.debug(vim.inspect(settings.ltex.disabledRules))
     return client.notify("workspace/didChangeConfiguration", settings)
 end
@@ -40,9 +42,15 @@ end
 local function update_hiddenFalsePositive(client, lang)
     log.trace("update_hiddenFalsePositive")
     local settings = get_settings(client)
-    settings.ltex.hiddenFalsePositives[lang] = loadFile(types.hRules, lang)
+    local root_dir = client.config.root_dir
+    settings.ltex.hiddenFalsePositives[lang] = loadFile(root_dir, types.hRules, lang)
     log.debug(vim.inspect(settings.ltex.hiddenFalsePositives))
     return client.notify("workspace/didChangeConfiguration", settings)
+end
+
+local function root_dir_from_context(context)
+    local client = vim.lsp.get_client_by_id(context.client_id)
+    return client.config.root_dir
 end
 
 local M = {}
@@ -88,36 +96,39 @@ function M.reload(langs)
     end
 end
 
-function M.addToDictionary(command)
+function M.addToDictionary(command, context)
     log.trace("addToDictionary")
+    local root_dir = root_dir_from_context(context)
     local args = command.arguments[1].words
     for lang, words in pairs(args) do
         log.fmt_debug("Lang: %s Words: %s", vim.inspect(lang), vim.inspect(words))
-        exportFile(types.dict, lang, words)
+        exportFile(root_dir, types.dict, lang, words)
         vim.schedule(function()
             M.updateConfig(types.dict, lang)
         end)
     end
 end
 
-function M.disableRules(command)
+function M.disableRules(command, context)
     log.trace("disableRules")
+    local root_dir = root_dir_from_context(context)
     local args = command.arguments[1].ruleIds
     for lang, rules in pairs(args) do
         log.fmt_debug("Lang: %s Rules: %s", vim.inspect(lang), vim.inspect(rules))
-        exportFile(types.dRules, lang, rules)
+        exportFile(root_dir, types.dRules, lang, rules)
         vim.schedule(function()
             M.updateConfig(types.dRules, lang)
         end)
     end
 end
 
-function M.hideFalsePositives(command)
+function M.hideFalsePositives(command, context)
     log.trace("hideFalsePositives")
+    local root_dir = root_dir_from_context(context)
     local args = command.arguments[1].falsePositives
     for lang, rules in pairs(args) do
         log.fmt_debug("Lang: %s Rules: %s", vim.inspect(lang), vim.inspect(rules))
-        exportFile(types.hRules, lang, rules)
+        exportFile(root_dir, types.hRules, lang, rules)
         vim.schedule(function()
             M.updateConfig(types.hRules, lang)
         end)
