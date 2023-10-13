@@ -1,11 +1,11 @@
 local M = {}
 
 M.opts = {
-    init_check = true,   -- boolean : whether to load dictionaries on startup
-    load_langs = {},     -- table <string> : language for witch dictionaries will be loaded
-    log_level = "none",  -- string : "none", "trace", "debug", "info", "warn", "error", "fatal"
-    path = "",           -- string : path to store dictionaries. Project root or current working directory
-    server_start = true, -- boolean : Enable the call to ltex. Usefull for migration and test
+    init_check = true,        -- boolean : whether to load dictionaries on startup
+    load_langs = { "en-US" }, -- table <string> : language for witch dictionaries will be loaded
+    log_level = "none",       -- string : "none", "trace", "debug", "info", "warn", "error", "fatal"
+    path = "",                -- string : path to store dictionaries. Project root or current working directory
+    server_start = true,      -- boolean : Enable the call to ltex. Usefull for migration and test
     server_opts = nil,
 }
 
