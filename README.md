@@ -119,7 +119,7 @@ At the moment, if you define stuff in `dictionary`, `disabledRules` and
 require("ltex_extra").setup {
     -- table <string> : languages for witch dictionaries will be loaded, e.g. { "es-AR", "en-US" }
     -- https://valentjn.github.io/ltex/supported-languages.html#natural-languages
-    load_langs = {}, -- en-US as default
+    load_langs = { "en-US" } -- en-US as default
     -- boolean : whether to load dictionaries on startup
     init_check = true,
     -- string : relative or absolute path to store dictionaries
