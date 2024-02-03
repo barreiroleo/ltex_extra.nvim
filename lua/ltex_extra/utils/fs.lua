@@ -7,7 +7,15 @@ local M = {}
 
 -- Returns path to the directory where ltex files should be located.
 M.path = function()
-    -- Check if the path is absolute.
+
+    -- Handle windows path with drive letter like C:\
+    if config_path:match("^%a:") then
+        local absolutePath = vim.fs.normalize(config_path) .. "\\"
+        log.trace("Returning absolute Windows path: " .. absolutePath)
+        return absolutePath
+    end
+
+    -- Check if the path is absolute for Linux
     if config_path:sub(1,1) == "/" then
         return config_path .. "/"
     end
@@ -17,6 +25,7 @@ M.path = function()
     -- Assume relative path and append to the root dir.
     return vim.fs.normalize(root_dir .. "/" .. config_path) .. "/"
 end
+
 
 -- Returns the filename for a type and lang required.
 M.joinPath = function(type, lang)
