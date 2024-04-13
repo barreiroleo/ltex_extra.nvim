@@ -7,7 +7,6 @@ local M = {}
 
 -- Returns path to the directory where ltex files should be located.
 M.path = function()
-
     -- Handle windows path with drive letter like C:\
     if config_path:match("^%a:") then
         local absolutePath = vim.fs.normalize(config_path) .. "\\"
@@ -16,7 +15,7 @@ M.path = function()
     end
 
     -- Check if the path is absolute for Linux
-    if config_path:sub(1,1) == "/" then
+    if config_path:sub(1, 1) == "/" then
         return config_path .. "/"
     end
 
@@ -43,7 +42,7 @@ M.mkdir = function(dirname)
     log.trace("Making dir ", dirname)
     local ok, err = uv.fs_mkdir(dirname, 484)
     if not ok then
-        log.vimwarn("Failed making directory: ", err)
+        vim.notify("Failed making directory: " .. err, vim.log.levels.WARN)
         return false
     else
         log.info("Directory made succesfully ", dirname)
@@ -63,7 +62,7 @@ M.check_dir = function(dirname)
     end
     ---@diagnostic disable-next-line: need-check-nil
     if stat.type ~= "directory" then
-        log.vimwarn(dirname .. " is not a directory")
+        vim.notify(dirname .. " is not a directory", vim.log.levels.WARN)
         return false
     end
     return true
@@ -74,7 +73,7 @@ M.writeFile = function(filename, lines)
     log.trace("Writing ", filename, lines)
     local fd, err = uv.fs_open(filename, "a+", 420)
     if not fd then
-        log.vimerror("Failed to open file " .. filename .. ": " .. err)
+        vim.notify("Failed to open file " .. filename .. ": " .. err, vim.log.levels.ERROR)
         return
     end
     uv.fs_write(fd, table.concat(lines, "\n") .. "\n")
@@ -88,7 +87,7 @@ M.exportFile = function(type, lang, lines)
     if M.check_dir(M.path()) then
         M.writeFile(filename, lines)
     else
-        log.vimwarn("Fail export " .. filename)
+        vim.notify("Fail export " .. filename, vim.log.levels.WARN)
     end
 end
 
@@ -103,7 +102,7 @@ M.check_line_feeds = function(filename, data)
         -- Overwrite file with sanitized data
         local fd, err = uv.fs_open(filename, "w", 420)
         if not fd then
-            log.vimerror("Failed to open file " .. filename .. ": " .. err)
+            vim.notify("Failed to open file " .. filename .. ": " .. err, vim.log.levels.ERROR)
             return data
         end
         uv.fs_write(fd, data)
@@ -117,7 +116,7 @@ M.readFile = function(filename)
     log.trace("Reading ", filename)
     local fd, err = uv.fs_open(filename, "r", 420)
     if not fd then
-        log.vimerror("Failed to open file " .. filename .. ": " .. err)
+        vim.notify("Failed to open file " .. filename .. ": " .. err, vim.log.levels.ERROR)
         return {}
     end
     local stat = uv.fs_fstat(fd)

@@ -41,19 +41,4 @@ end
 
 log = setup(package.loaded.ltex_extra.opts.log_level)
 
-log.viminfo = function(...)
-    vim.notify(...)
-    log.info(...)
-end
-
-log.vimwarn = function(...)
-    vim.notify(..., vim.log.levels.WARN)
-    log.warn(...)
-end
-
-log.vimerror = function(...)
-    vim.notify(..., vim.log.levels.ERROR)
-    log.error(...)
-end
-
 return log
