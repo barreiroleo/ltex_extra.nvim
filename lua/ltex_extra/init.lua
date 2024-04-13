@@ -40,11 +40,11 @@ local function extend_ltex_on_attach(on_attach)
     end
 end
 
-M.reload = function(...)
+function M.reload(...)
     require("ltex_extra.commands-lsp").reload(...)
 end
 
-M.setup = function(opts)
+function M.setup(opts)
     M.opts = vim.tbl_deep_extend("force", M.opts, opts or {})
     M.opts.path = vim.fs.normalize(M.opts.path)
 
