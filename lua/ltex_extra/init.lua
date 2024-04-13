@@ -56,6 +56,7 @@ M.setup = function(opts)
     else
         first_load()
     end
+    return true
 end
 
 return M
