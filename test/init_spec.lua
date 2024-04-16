@@ -53,4 +53,16 @@ describe("Setup and config:", function()
         log.trace("Setup after")
         assert.equals(true, status)
     end)
+
+    it("Registered commands", function()
+        local registered_commands = vim.tbl_keys(vim.lsp.commands)
+        local commands = {
+            "_ltex.addToDictionary",
+            "_ltex.disableRules",
+            "_ltex.hideFalsePositives"
+        }
+        for _, key in ipairs(commands) do
+            assert.equals(true, vim.tbl_contains(registered_commands, key))
+        end
+    end)
 end)
