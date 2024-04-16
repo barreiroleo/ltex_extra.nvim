@@ -1,12 +1,20 @@
 ---
-lang: es-AR
+# Uncomment en-US to switch ltex language
+# Execute after delete ltex files: require("ltex_extra").reload()
+lang: en-us
+# lang: es-ar
 ---
-This is a misspelling.
-this sentences should beggining uppercase.
-This rules is going to be disabled.
 
+1- Add word to dictionary
+This is a missspelling.
 Esto es un errorr.
+
+2- Hide false positive
+this sentences should beggining uppercase.
 esta oración debe comenzar con mayúsculas.
+
+3- Disable rule
+This rule' going to be disabled.
 Esta regla sera desactivada.
 
-=require("ltex_extra").reload()
+<!-- vim: set foldlevel=99 nomodifiable: -->
