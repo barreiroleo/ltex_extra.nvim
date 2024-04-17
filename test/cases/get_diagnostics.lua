@@ -1,5 +1,6 @@
-local get_code_actions = require("test.utils").get_code_actions
-local load_file = require("test.utils").load_file
+local get_code_actions = require("test.utils.init").get_code_actions
+local load_file = require("test.utils.init").load_file
+local spawn_window = require("test.utils.init").spawn_window
 
 
 local test_filename = vim.fs.normalize("./test/assets/main.md")
@@ -7,7 +8,7 @@ local test_filename = vim.fs.normalize("./test/assets/main.md")
 local test_bufnr = load_file(test_filename)
 assert(test_bufnr ~= nil, "Faied to load test file")
 
-local win = require("test.utils").spawn_window(test_bufnr)
+local win = spawn_window(test_bufnr)
 
 
 local ltex_client = vim.lsp.get_clients({ bufnr = test_bufnr, name = "ltex" })[1]

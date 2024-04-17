@@ -1,5 +1,5 @@
-local load_file = require("test.utils").load_file
-local spawn_window = require("test.utils").spawn_window
+local load_file = require("test.utils.init").load_file
+local spawn_window = require("test.utils.init").spawn_window
 
 
 ---@type string

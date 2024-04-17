@@ -3,6 +3,7 @@ local log = require("plenary.log").new({
     use_file = false,
     level = "trace"
 })
+
 describe("Setup and config:", function()
     local LOG = require("ltex_extra.test.setup")
     local M = {}
