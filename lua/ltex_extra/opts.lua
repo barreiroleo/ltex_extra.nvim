@@ -20,15 +20,11 @@
 ---@field language string
 ---@field additionalRules table {enablePickyRules: boolean, motherTongue: string}
 
-
----@type table{ltex_filetypes:string{}, ltex_opts:ltex_opts, ltex_extra_opts:Ltex_extra_opts}
-local OPTS = {}
-
 ---@type string[]
-OPTS.ltex_filetypes = { "bib", "markdown", "org", "plaintex", "rst", "rnoweb", "tex" }
+local ltex_filetypes = { "bib", "markdown", "org", "plaintex", "rst", "rnoweb", "tex" }
 
 ---@type LtexOpts
-OPTS.ltex_opts = {
+local ltex_opts = {
     settings = {
         checkFrequency = "save",
         language = "es-AR",
@@ -38,22 +34,23 @@ OPTS.ltex_opts = {
         },
     },
 }
+
 ---@type PluginOpts
-OPTS.ltex_extra_opts = {
+local ltex_extra_opts = {
     init_check = true,
     load_langs = { "es-AR", "en-US" },
-    log_level = require("ltex_extra.test.setup").TRACE,
+    log_level = "warn",
     path = ".ltex",
     server_start = false,
     server_opts = {
         on_attach = function(client, bufnr)
             print("Loading ltex from ltex_extra")
         end,
-        filetypes = OPTS.ltex_filetypes,
+        filetypes = ltex_filetypes,
         settings = {
-            ltex = OPTS.ltex_opts,
+            ltex = ltex_opts,
         },
     },
 }
 
-return OPTS
+return ltex_extra_opts

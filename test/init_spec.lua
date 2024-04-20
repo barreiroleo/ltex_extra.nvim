@@ -1,24 +1,14 @@
-local log = require("plenary.log").new({
-    plugin = "ltex tests",
-    use_file = false,
-    level = "trace"
-})
+local function unload_ltex_extra()
+    package.loaded.ltex_extra = nil
+end
+
+local OPTS = require("ltex_extra.opts")
+OPTS.log_level = "trace"
 
 describe("Setup and config:", function()
-    local OPTS = require("ltex_extra.opts")
-
-    before_each(
-        function()
-            log.trace("Reloading ltex_extra")
-            -- require("plenary.reload").reload_module("ltex_extra", false)
-            package.loaded.ltex_extra = nil
-        end
-    )
-
     it("Setup", function()
-        log.trace("Setup")
-        local status = require("ltex_extra").setup(OPTS.ltex_extra_opts)
-        log.trace("Setup after")
+        unload_ltex_extra()
+        local status = require("ltex_extra").setup(OPTS)
         assert.equals(true, status)
     end)
 
