@@ -1,3 +1,5 @@
+local logger = require("ltex_extra.utils.log")
+
 local M = {}
 
 M.opts = {
@@ -48,6 +50,7 @@ function M.setup(opts)
     M.opts = vim.tbl_deep_extend("force", M.opts, opts or {})
     M.opts.path = vim.fs.normalize(M.opts.path)
 
+    logger:new(opts.log_level)
     register_lsp_commands()
 
     if M.opts.server_opts and M.opts.server_start then

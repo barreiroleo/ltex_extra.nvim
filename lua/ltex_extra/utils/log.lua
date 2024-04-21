@@ -1,4 +1,3 @@
-require("plenary.reload").reload_module("ltex_extra.utils.log")
 ---@class Logger
 ---@field trace fun(...: string)
 ---@field debug fun(...: string)
@@ -19,56 +18,67 @@ local LogLevel = {
     fatal = 7,
 }
 
-
 ---@class LoggerOpts
----@field logLevel LogLevel
 ---@field usePlenary boolean
-local default_opts = {
-    logLevel = "trace",
-    usePlenary = false
-}
+---@field logLevel LogLevel
 
+---@class LoggerBuilder
+---@field __index self
+---@field log Logger
+---@field usePlenary boolean
+---@field loglevel LogLevel
 
----@type Logger
----@param loglevel LogLevel
-local function plenary_logger(loglevel)
-    return require("plenary.log").new {
-        plugin = "ltex_extra",
-        use_file = false,
-        level = loglevel
-    }
-end
+local LoggerBuilder = {}
 
----@type Logger
-local vim_logger = {
-    trace = function(...) vim.notify(..., vim.log.levels.TRACE) end,
-    debug = function(...) vim.notify(..., vim.log.levels.DEBUG) end,
-    info  = function(...) vim.notify(..., vim.log.levels.INFO) end,
-    warn  = function(...) vim.notify(..., vim.log.levels.WARN) end,
-    error = function(...) vim.notify(..., vim.log.levels.ERROR) end,
-    fatal = function(...) vim.notify(..., vim.log.levels.ERROR) end
-}
-
-
-local Logger = {}
-
+---@type LoggerBuilder
 ---@param opts LoggerOpts
----@return Logger
-function Logger:new(opts)
-    local logger = nil
-    if opts.usePlenary then
-        logger = plenary_logger(opts.logLevel)
+function LoggerBuilder:new(opts)
+    local o = setmetatable({}, self)
+    self.__index = self
+    self.log = nil
+    self.usePlenary = opts.usePlenary or false
+    ---@type LogLevel
+    self.logLevel = opts.logLevel or "trace"
+
+    if self.usePlenary then
+        self.log = self:GetPlenaryLogger(self.logLevel)
     else
-        logger = vim_logger
+        -- TODO: implementn level filter for vim_logger
+        self.log = self:GetVimLogger(self.logLevel)
     end
-    return setmetatable(logger, self)
+
+    return o
 end
 
-local log = Logger:new(default_opts)
-P(log)
-log.trace("trace")
-log.debug("debug")
-log.info("info")
-log.warn("warn")
-log.error("error")
-log.fatal("fatal")
+function LoggerBuilder:__debug_reset()
+    require("plenary.reload").reload_module("ltex_extra.utils.log")
+end
+
+---@param loglevel LogLevel
+---@return Logger
+function LoggerBuilder:GetPlenaryLogger(loglevel)
+    return require("plenary.log").new { plugin = "ltex_extra", use_file = false, level = loglevel }
+end
+
+---@param loglevel LogLevel
+---@return Logger
+function LoggerBuilder:GetVimLogger(loglevel)
+    ---@type Logger
+    local vim_logger = {
+        trace = function(...) vim.notify(..., vim.log.levels.TRACE) end,
+        debug = function(...) vim.notify(..., vim.log.levels.DEBUG) end,
+        info  = function(...) vim.notify(..., vim.log.levels.INFO) end,
+        warn  = function(...) vim.notify(..., vim.log.levels.WARN) end,
+        error = function(...) vim.notify(..., vim.log.levels.ERROR) end,
+        fatal = function(...) vim.notify(..., vim.log.levels.ERROR) end
+    }
+    -- Overrides lower severities with a dummy function
+    for key, severity in pairs(LogLevel) do
+        if severity < LogLevel[loglevel] then
+            vim_logger[key] = function(...) end
+        end
+    end
+    return vim_logger
+end
+
+return LoggerBuilder

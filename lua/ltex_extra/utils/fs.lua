@@ -1,4 +1,4 @@
-local log = require("ltex_extra.utils.log")
+local log = require("ltex_extra.utils.log").log
 local server_opts = require("ltex_extra").opts.server_opts
 local config_path = package.loaded.ltex_extra.opts.path
 local uv = vim.loop
