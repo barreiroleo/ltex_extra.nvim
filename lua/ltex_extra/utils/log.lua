@@ -6,79 +6,82 @@
 ---@field error fun(...: string)
 ---@field fatal fun(...: string)
 
-
----@enum (key) LogLevel
-local LogLevel = {
-    none  = 1,
-    trace = 2,
-    debug = 3,
-    info  = 4,
-    warn  = 5,
-    error = 6,
-    fatal = 7,
-}
-
 ---@class LoggerOpts
 ---@field usePlenary boolean
 ---@field logLevel LogLevel
 
 ---@class LoggerBuilder
----@field __index self
 ---@field log Logger
 ---@field usePlenary boolean
 ---@field loglevel LogLevel
+
+---@enum (key) LogLevel
+local LogLevels = {
+    none  = 0,
+    fatal = 1,
+    error = 2,
+    warn  = 3,
+    info  = 4,
+    debug = 5,
+    trace = 6,
+}
+
 
 local LoggerBuilder = {}
 
 ---@type LoggerBuilder
 ---@param opts LoggerOpts
 function LoggerBuilder:new(opts)
-    local o = setmetatable({}, self)
+    ---@type LoggerBuilder
     self.__index = self
+    ---@type Logger
     self.log = nil
+    ---@type boolean
     self.usePlenary = opts.usePlenary or false
-    ---@type LogLevel
+    ---@type string
     self.logLevel = opts.logLevel or "trace"
 
     if self.usePlenary then
         self.log = self:GetPlenaryLogger(self.logLevel)
     else
-        -- TODO: implementn level filter for vim_logger
         self.log = self:GetVimLogger(self.logLevel)
     end
 
-    return o
+    return setmetatable({}, self)
 end
 
 function LoggerBuilder:__debug_reset()
     require("plenary.reload").reload_module("ltex_extra.utils.log")
+    require("plenary.reload").reload_module("plenary.log")
 end
 
 ---@param loglevel LogLevel
 ---@return Logger
 function LoggerBuilder:GetPlenaryLogger(loglevel)
-    return require("plenary.log").new { plugin = "ltex_extra", use_file = false, level = loglevel }
+    local opts = { plugin = "ltex_extra", level = loglevel, use_console = "async" }
+    return require("plenary.log").new(opts)
 end
 
----@param loglevel LogLevel
+---@type Logger
+local VimLogger = {
+    trace = vim.schedule_wrap(function(...) vim.notify("[Ltex_extra] [TRACE] " .. ..., vim.log.levels.TRACE) end),
+    debug = vim.schedule_wrap(function(...) vim.notify("[Ltex_extra] [DEBUG] " .. ..., vim.log.levels.DEBUG) end),
+    info  = vim.schedule_wrap(function(...) vim.notify("[Ltex_extra] [INFO] " .. ..., vim.log.levels.INFO) end),
+    warn  = vim.schedule_wrap(function(...) vim.notify("[Ltex_extra] [WARN] " .. ..., vim.log.levels.WARN) end),
+    error = vim.schedule_wrap(function(...) vim.notify("[Ltex_extra] [ERROR] " .. ..., vim.log.levels.ERROR) end),
+    fatal = vim.schedule_wrap(function(...) vim.notify("[Ltex_extra] [FATAL] " .. ..., vim.log.levels.ERROR) end)
+}
+
+---@param severity string
 ---@return Logger
-function LoggerBuilder:GetVimLogger(loglevel)
-    ---@type Logger
-    local vim_logger = {
-        trace = function(...) vim.notify(..., vim.log.levels.TRACE) end,
-        debug = function(...) vim.notify(..., vim.log.levels.DEBUG) end,
-        info  = function(...) vim.notify(..., vim.log.levels.INFO) end,
-        warn  = function(...) vim.notify(..., vim.log.levels.WARN) end,
-        error = function(...) vim.notify(..., vim.log.levels.ERROR) end,
-        fatal = function(...) vim.notify(..., vim.log.levels.ERROR) end
-    }
+function LoggerBuilder:GetVimLogger(severity)
     -- Overrides lower severities with a dummy function
-    for key, severity in pairs(LogLevel) do
-        if severity < LogLevel[loglevel] then
-            vim_logger[key] = function(...) end
+    for index, _ in pairs(VimLogger) do
+        if LogLevels[severity] < LogLevels[index] then
+            VimLogger[index] = function() end
         end
     end
-    return vim_logger
+    return VimLogger
 end
 
 return LoggerBuilder
