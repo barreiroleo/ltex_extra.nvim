@@ -15,6 +15,8 @@ local test_cases = {
 }
 
 
+
+-- describe("Code action: Add to dictionary", function()
 -- Load test assset.
 local test_bufnr = load_file(test_filename)
 assert(test_bufnr ~= nil, string.format("Error loading %s in new buffer", test_filename))
@@ -32,7 +34,9 @@ local code_action_opts = {
     apply = true,
 }
 vim.lsp.buf.code_action(code_action_opts)
-
+local isDictionaryFile = vim.uv.fs_stat(".ltex/ltex.dictionary.en-us.txt")
+assert(isDictionaryFile, "Cannot find custom ltex dictionary")
+-- end)
 
 -- Code action passed to the code action filter
 --
