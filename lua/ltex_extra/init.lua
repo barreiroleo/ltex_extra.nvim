@@ -79,6 +79,24 @@ function LtexExtra:trigger_load_ltex_files()
 end
 
 function LtexExtra:register_autocommands()
+    vim.api.nvim_create_user_command("LtexExtraReload", function(opts)
+        -- local fargs = { '"es-AR"', '"en-US"' }
+        local langs = {}
+        for _, lang in ipairs(opts.fargs) do
+            for k in string.gmatch(lang, "(%w*-%w*)") do table.insert(langs, k) end
+        end
+        if vim.tbl_isempty(langs) then
+            langs = ltex_extra.opts.load_langs
+        end
+        LoggerBuilder.log.info(string.format("LtexExtraReload: Reloading %s ", vim.inspect(langs)))
+        ltex_extra_api.reload(langs)
+    end, {
+        nargs = "*", -- 0,1, or many
+        -- selene: allow(unused_variable)
+        complete = function(arglead, cmdline, cursorpos)
+            return ltex_extra.opts.load_langs
+        end
+    })
 end
 
 function ltex_extra_api.setup(opts)
