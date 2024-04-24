@@ -1,18 +1,24 @@
-local function unload_ltex_extra()
-    package.loaded.ltex_extra = nil
-end
+local def_opts = require("ltex_extra.opts").tests_opts
 
-local OPTS = require("ltex_extra.opts")
-OPTS.log_level = "trace"
+describe("Setup and API:", function()
+    before_each(function()
+        require("ltex_extra").__debug_reset()
+        require("ltex_extra.utils.log"):__debug_reset()
+    end)
 
-describe("Setup and config:", function()
     it("Setup", function()
-        unload_ltex_extra()
-        local status = require("ltex_extra").setup(OPTS)
-        assert.equals(true, status)
+        local status = require("ltex_extra").setup(def_opts)
+        assert(status ~= nil, "Setup didn't finish its execution")
+    end)
+
+    it("Get opts", function()
+        require("ltex_extra").setup(def_opts)
+        local opts = require("ltex_extra").get_opts()
+        assert(opts ~= nil, "Cannot reach the ltex opts")
     end)
 
     it("Registered commands", function()
+        require("ltex_extra").setup(def_opts)
         local registered_commands = vim.tbl_keys(vim.lsp.commands)
         local commands = {
             "_ltex.addToDictionary",

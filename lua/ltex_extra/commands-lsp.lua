@@ -1,4 +1,5 @@
 local log = require("ltex_extra.utils.log").log
+local ltex_extra = require("ltex_extra")
 
 local exportFile = require("ltex_extra.utils.fs").exportFile
 local loadFile = require("ltex_extra.utils.fs").loadFile
@@ -76,8 +77,9 @@ end
 
 function M.reload(langs)
     log.trace("updateConfigFull")
-    langs = langs or package.loaded.ltex_extra.opts.load_langs
+    langs = langs or ltex_extra.get_opts().load_langs
     for _, lang in pairs(langs) do
+        lang = string.lower(lang)
         log.trace(string.format("Loading %s", lang))
         vim.schedule(function()
             M.updateConfig(types.dict, lang)
@@ -115,7 +117,7 @@ function M.hideFalsePositives(command)
     log.trace("hideFalsePositives")
     local args = command.arguments[1].falsePositives
     for lang, rules in pairs(args) do
-        log.debug(string.format( "Lang: %s Rules: %s", vim.inspect(lang), vim.inspect(rules) ))
+        log.debug(string.format("Lang: %s Rules: %s", vim.inspect(lang), vim.inspect(rules)))
         exportFile(types.hRules, lang, rules)
         vim.schedule(function()
             M.updateConfig(types.hRules, lang)
