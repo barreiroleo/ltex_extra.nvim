@@ -67,7 +67,7 @@ function M.updateConfig(configtype, lang)
         elseif configtype == types.hRules then
             update_hiddenFalsePositive(client, lang)
         else
-            return vim.notify("Unknown config type", vim.log.levels.ERROR)
+            return log.error("Unknown config type")
         end
     else
         return error("Error catching ltex client", 1)
@@ -78,7 +78,7 @@ function M.reload(langs)
     log.trace("updateConfigFull")
     langs = langs or package.loaded.ltex_extra.opts.load_langs
     for _, lang in pairs(langs) do
-        vim.notify(string.format("Loading %s", lang), vim.log.levels.TRACE)
+        log.trace(string.format("Loading %s", lang))
         vim.schedule(function()
             M.updateConfig(types.dict, lang)
             M.updateConfig(types.dRules, lang)
@@ -91,7 +91,7 @@ function M.addToDictionary(command)
     log.trace("addToDictionary")
     local args = command.arguments[1].words
     for lang, words in pairs(args) do
-        vim.notify(string.format("Lang: %s Words: %s", vim.inspect(lang), vim.inspect(words)), vim.log.levels.DEBUG)
+        log.debug(string.format("Lang: %s Words: %s", vim.inspect(lang), vim.inspect(words)))
         exportFile(types.dict, lang, words)
         vim.schedule(function()
             M.updateConfig(types.dict, lang)
@@ -103,7 +103,7 @@ function M.disableRules(command)
     log.trace("disableRules")
     local args = command.arguments[1].ruleIds
     for lang, rules in pairs(args) do
-        vim.notify("Lang: %s Rules: %s", vim.inspect(lang), vim.inspect(rules), vim.log.levels.DEBUG)
+        log.debug(string.format("Lang: %s Rules: %s", vim.inspect(lang), vim.inspect(rules)))
         exportFile(types.dRules, lang, rules)
         vim.schedule(function()
             M.updateConfig(types.dRules, lang)
@@ -115,7 +115,7 @@ function M.hideFalsePositives(command)
     log.trace("hideFalsePositives")
     local args = command.arguments[1].falsePositives
     for lang, rules in pairs(args) do
-        vim.notify("Lang: %s Rules: %s", vim.inspect(lang), vim.inspect(rules), vim.log.levels.DEBUG)
+        log.debug(string.format( "Lang: %s Rules: %s", vim.inspect(lang), vim.inspect(rules) ))
         exportFile(types.hRules, lang, rules)
         vim.schedule(function()
             M.updateConfig(types.hRules, lang)

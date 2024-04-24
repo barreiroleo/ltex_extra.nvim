@@ -42,7 +42,7 @@ M.mkdir = function(dirname)
     log.trace("Making dir ", dirname)
     local ok, err = uv.fs_mkdir(dirname, 484)
     if not ok then
-        vim.notify("Failed making directory: " .. err, vim.log.levels.WARN)
+        log.warn("Failed making directory: " .. err)
         return false
     else
         log.info("Directory made succesfully ", dirname)
@@ -62,7 +62,7 @@ M.check_dir = function(dirname)
     end
     ---@diagnostic disable-next-line: need-check-nil
     if stat.type ~= "directory" then
-        vim.notify(dirname .. " is not a directory", vim.log.levels.WARN)
+        log.warn(dirname .. " is not a directory")
         return false
     end
     return true
@@ -73,7 +73,7 @@ M.writeFile = function(filename, lines)
     log.trace("Writing ", filename, lines)
     local fd, err = uv.fs_open(filename, "a+", 420)
     if not fd then
-        vim.notify("Failed to open file " .. filename .. ": " .. err, vim.log.levels.ERROR)
+        log.error("Failed to open file " .. filename .. ": " .. err)
         return
     end
     uv.fs_write(fd, table.concat(lines, "\n") .. "\n")
@@ -87,7 +87,7 @@ M.exportFile = function(type, lang, lines)
     if M.check_dir(M.path()) then
         M.writeFile(filename, lines)
     else
-        vim.notify("Fail export " .. filename, vim.log.levels.WARN)
+        log.warn("Fail export " .. filename)
     end
 end
 
@@ -102,7 +102,7 @@ M.check_line_feeds = function(filename, data)
         -- Overwrite file with sanitized data
         local fd, err = uv.fs_open(filename, "w", 420)
         if not fd then
-            vim.notify("Failed to open file " .. filename .. ": " .. err, vim.log.levels.ERROR)
+            log.error("Failed to open file " .. filename .. ": " .. err)
             return data
         end
         uv.fs_write(fd, data)
@@ -116,7 +116,7 @@ M.readFile = function(filename)
     log.trace("Reading ", filename)
     local fd, err = uv.fs_open(filename, "r", 420)
     if not fd then
-        vim.notify("Failed to open file " .. filename .. ": " .. err, vim.log.levels.ERROR)
+        log.error("Failed to open file " .. filename .. ": " .. err)
         return {}
     end
     local stat = uv.fs_fstat(fd)
