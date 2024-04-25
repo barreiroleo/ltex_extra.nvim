@@ -80,20 +80,6 @@ function LtexExtra:ListenLtexAttach()
     })
 end
 
----TODO: Move to commands-lsp file
----@return nil: Register client side commands
-function LtexExtra:RegisterClientMethods()
-    vim.lsp.commands["_ltex.addToDictionary"] = require("ltex_extra.commands-lsp").addToDictionary
-    vim.lsp.commands["_ltex.hideFalsePositives"] = require("ltex_extra.commands-lsp").hideFalsePositives
-    vim.lsp.commands["_ltex.disableRules"] = require("ltex_extra.commands-lsp").disableRules
-end
-
----@return boolean status: True as OK, false if it's waiting for ltex attach
-function LtexExtra:TriggerLoadLtexFiles()
-    LtexExtra:PushTask(ltex_extra_api.reload, LtexExtra.opts.load_langs)
-    return false
-end
-
 function LtexExtra:RegisterAutocommands()
     vim.api.nvim_create_user_command("LtexExtraReload", function(opts)
         -- local fargs = { '"es-AR"', '"en-US"' }
@@ -115,13 +101,25 @@ function LtexExtra:RegisterAutocommands()
     })
 end
 
+---@return nil: Register client side commands
+function LtexExtra:RegisterClientMethods()
+    vim.lsp.commands["_ltex.addToDictionary"] = require("ltex_extra.commands-lsp").addToDictionary
+    vim.lsp.commands["_ltex.hideFalsePositives"] = require("ltex_extra.commands-lsp").hideFalsePositives
+    vim.lsp.commands["_ltex.disableRules"] = require("ltex_extra.commands-lsp").disableRules
+end
+
+---@return boolean status: True as OK, false if it's waiting for ltex attach
+function LtexExtra:TriggerLoadLtexFiles()
+    LtexExtra:PushTask(ltex_extra_api.reload, LtexExtra.opts.load_langs)
+    return false
+end
+
 function ltex_extra_api.setup(opts)
     opts = vim.tbl_deep_extend("force", legacy_opts, opts or {})
     opts.path = vim.fs.normalize(opts.path)
-    LoggerBuilder:new({ logLevel = opts.log_level, usePlenary = true })
-
-    LtexExtra:new(opts)
     -- Initialize the logger
+    LoggerBuilder:new({ logLevel = opts.log_level, usePlenary = true })
+    LtexExtra:new(opts)
     -- Create LtexExtra commands: Reload
     LtexExtra:RegisterAutocommands()
     -- Register client side commands
