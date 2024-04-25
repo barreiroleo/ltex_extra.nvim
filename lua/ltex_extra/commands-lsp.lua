@@ -1,5 +1,5 @@
 local log = require("ltex_extra.utils.log").log
-local ltex_extra = require("ltex_extra")
+local ltex_extra_api = require("ltex_extra")
 
 local exportFile = require("ltex_extra.utils.fs").exportFile
 local loadFile = require("ltex_extra.utils.fs").loadFile
@@ -48,18 +48,9 @@ end
 
 local M = {}
 
-function M.catch_ltex()
-    log.trace("catch_ltex")
-    local buf_clients = vim.lsp.get_active_clients({
-        bufnr = vim.api.nvim_get_current_buf(),
-        name = "ltex",
-    })
-    return buf_clients[1]
-end
-
 function M.updateConfig(configtype, lang)
     log.trace("updateConfig")
-    local client = M.catch_ltex()
+    local client = ltex_extra_api.get_ltex_client()
     if client then
         if configtype == types.dict then
             update_dictionary(client, lang)
@@ -77,7 +68,7 @@ end
 
 function M.reload(langs)
     log.trace("updateConfigFull")
-    langs = langs or ltex_extra.get_opts().load_langs
+    langs = langs or ltex_extra_api.get_opts().load_langs
     for _, lang in pairs(langs) do
         lang = string.lower(lang)
         log.trace(string.format("Loading %s", lang))
