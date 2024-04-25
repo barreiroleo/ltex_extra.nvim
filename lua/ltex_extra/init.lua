@@ -1,21 +1,17 @@
 local LoggerBuilder = require("ltex_extra.utils.log")
 local legacy_opts = require("ltex_extra.opts").legacy_def_opts
 
----LtexExtra main class.
---@class LtexExtra
---@field new fun(opts: LtexExtraOpts): LtexExtraMgr
-local LtexExtra = {}
-
----LtexExtra state manager. All (potentially) dynamic states should be here.
+---LtexExtra manager.
 ---@class LtexExtraMgr
----@field opts LtexExtraOpts
----@field augroup_id integer
----@field ltex_status boolean
-local ltex_extra = nil
+---@field __index LtexExtraMgr Singleton instance
+---@field opts LtexExtraOpts Full options table
+---@field augroup_id integer Autocommands group id
+---@field ltex_client vim.lsp.Client | nil Client attached to Ltex server
+local LtexExtra = {}
 
 ---LtexExtraApi. Public endpoint to interact with LtexExtra via `require("ltex_extra")`.
 ---@class LtexExtraApi
----@field setup fun(opts: LtexExtraOpts | nil): LtexExtraMgr
+---@field setup fun(opts: LtexExtraOpts | nil): boolean
 ---@field reload fun(...)
 ---@field get_opts fun(): LtexExtraOpts
 local ltex_extra_api = {}
@@ -23,54 +19,53 @@ local ltex_extra_api = {}
 ---@param opts LtexExtraOpts
 ---@return LtexExtraMgr
 function LtexExtra:new(opts)
-    -- Singleton like
-    if self.__index ~= nil then
-        return self.__index
+    if not self.__index then
+        self.__index = self
+        self.opts = opts
+        self.augroup_id = vim.api.nvim_create_augroup("LtexExtra", { clear = false })
+        self.ltex_client = self:GetLtexClient()
     end
-    self.__index = self
-    self.opts = opts
-    self.augroup_id = vim.api.nvim_create_augroup("LtexExtra", { clear = false })
-    return setmetatable({}, self)
-end
-
-function LtexExtra:ListenLtexAttach()
-    LoggerBuilder.log.debug("Listening for ltex client attach")
-    vim.api.nvim_create_autocmd("LspAttach", {
-        group = LtexExtra.augroup_id,
-        callback = function(args)
-            local bufnr = args.buf
-            local client = vim.lsp.get_client_by_id(args.data.client_id)
-            if client ~= nil and client.name == "ltex" then
-                LoggerBuilder.log.info(string.format("LtexExtra attached to ltex client", client.name, bufnr))
-            end
-        end,
-    })
+    return self
 end
 
 ---@return vim.lsp.Client|nil client Ltex client if found
-function LtexExtra:getLtexClient()
-    -- If ltex is not up, listen to the attach event
+function LtexExtra:GetLtexClient()
     local ltex_client = vim.lsp.get_clients({ name = 'ltex' })[1]
     if ltex_client then
-        LoggerBuilder.log.debug("ltex already running")
+        LoggerBuilder.log.debug("Ltex client found at client id " .. ltex_client.id)
     else
+        LoggerBuilder.log.info("Ltex client not found. Waiting for attach")
         LtexExtra:ListenLtexAttach()
     end
     return ltex_client
 end
 
+--TODO: Evaluate if we need to listen the LspDetach event
+function LtexExtra:ListenLtexAttach()
+    vim.api.nvim_create_autocmd("LspAttach", {
+        group = LtexExtra.augroup_id,
+        callback = function(args)
+            local client = vim.lsp.get_client_by_id(args.data.client_id)
+            if client ~= nil and client.name == "ltex" then
+                LtexExtra.ltex_client = client
+                LoggerBuilder.log.info(string.format("LtexExtra attached to ltex client", client.name))
+            end
+        end,
+    })
+end
+
 ---TODO: Move to commands-lsp file
 ---@return nil: Register client side commands
-function LtexExtra:register_client_methods()
+function LtexExtra:RegisterClientMethods()
     vim.lsp.commands["_ltex.addToDictionary"] = require("ltex_extra.commands-lsp").addToDictionary
     vim.lsp.commands["_ltex.hideFalsePositives"] = require("ltex_extra.commands-lsp").hideFalsePositives
     vim.lsp.commands["_ltex.disableRules"] = require("ltex_extra.commands-lsp").disableRules
 end
 
 ---@return boolean status: True as OK, false if it's waiting for ltex attach
-function LtexExtra:trigger_load_ltex_files()
-    if ltex_extra.ltex_status then
-        ltex_extra_api.reload(ltex_extra.opts.load_langs)
+function LtexExtra:TriggerLoadLtexFiles()
+    if LtexExtra.ltex_client then
+        ltex_extra_api.reload(LtexExtra.opts.load_langs)
         return true
     else
         LtexExtra:ListenLtexAttach()
@@ -78,7 +73,7 @@ function LtexExtra:trigger_load_ltex_files()
     end
 end
 
-function LtexExtra:register_autocommands()
+function LtexExtra:RegisterAutocommands()
     vim.api.nvim_create_user_command("LtexExtraReload", function(opts)
         -- local fargs = { '"es-AR"', '"en-US"' }
         local langs = {}
@@ -86,7 +81,7 @@ function LtexExtra:register_autocommands()
             for k in string.gmatch(lang, "(%w*-%w*)") do table.insert(langs, k) end
         end
         if vim.tbl_isempty(langs) then
-            langs = ltex_extra.opts.load_langs
+            langs = LtexExtra.opts.load_langs
         end
         LoggerBuilder.log.info(string.format("LtexExtraReload: Reloading %s ", vim.inspect(langs)))
         ltex_extra_api.reload(langs)
@@ -94,7 +89,7 @@ function LtexExtra:register_autocommands()
         nargs = "*", -- 0,1, or many
         -- selene: allow(unused_variable)
         complete = function(arglead, cmdline, cursorpos)
-            return ltex_extra.opts.load_langs
+            return LtexExtra.opts.load_langs
         end
     })
 end
@@ -102,18 +97,17 @@ end
 function ltex_extra_api.setup(opts)
     opts = vim.tbl_deep_extend("force", legacy_opts, opts or {})
     opts.path = vim.fs.normalize(opts.path)
-    ltex_extra = LtexExtra:new(opts)
+    LoggerBuilder:new({ logLevel = opts.log_level, usePlenary = true })
+
+    LtexExtra:new(opts)
     -- Initialize the logger
-    ---@type LoggerOpts
-    ---@diagnostic disable-next-line: assign-type-mismatch
-    LoggerBuilder:new({ usePlenary = true, logLevel = opts.log_level })
     -- Create LtexExtra commands: Reload
-    LtexExtra:register_autocommands()
+    LtexExtra:RegisterAutocommands()
     -- Register client side commands
-    LtexExtra:register_client_methods()
+    LtexExtra:RegisterClientMethods()
     -- Load ltex files
-    LtexExtra:trigger_load_ltex_files()
-    return ltex_extra
+    LtexExtra:TriggerLoadLtexFiles()
+    return true
 end
 
 function ltex_extra_api.reload(...)
@@ -121,7 +115,7 @@ function ltex_extra_api.reload(...)
 end
 
 function ltex_extra_api.get_opts()
-    return ltex_extra.opts
+    return LtexExtra.opts
 end
 
 function ltex_extra_api.__debug_reset()

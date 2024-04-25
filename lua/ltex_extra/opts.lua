@@ -33,11 +33,20 @@ local legacy_opts = {
     server_opts = nil,
 }
 
+---@type LtexExtraOpts
+local opts = {
+    load_langs = { "en-US" },
+    log_level = "info",
+    path = ".ltex"
+}
+
+-- P(vim.tbl_extend("keep", opts, legacy_opts))
+
 ---@type Legacy_LtexExtraOpts
 local tests_opts = {
     init_check = true,
     load_langs = { "es-AR", "en-US" },
-    log_level = "debug",
+    log_level = "info",
     path = ".ltex",
     server_start = false,
     server_opts = {
