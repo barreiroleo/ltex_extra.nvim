@@ -7,6 +7,7 @@ local legacy_opts = require("ltex_extra.opts").legacy_def_opts
 ---@field opts LtexExtraOpts Full options table
 ---@field augroup_id integer Autocommands group id
 ---@field ltex_client vim.lsp.Client | nil Client attached to Ltex server
+---@field task_queue table{fun: fun(...), args: table{any}}
 local LtexExtra = {}
 
 ---LtexExtraApi. Public endpoint to interact with LtexExtra via `require("ltex_extra")`.
@@ -24,8 +25,27 @@ function LtexExtra:new(opts)
         self.opts = opts
         self.augroup_id = vim.api.nvim_create_augroup("LtexExtra", { clear = false })
         self.ltex_client = self:GetLtexClient()
+        self.task_queue = {}
     end
     return self
+end
+
+---@param callback fun(...)
+---@param args table{any}
+function LtexExtra:PushTask(callback, args)
+    if LtexExtra.ltex_client then
+        callback(args)
+    else
+        LoggerBuilder.log.trace("Client not running. Queuing the task.")
+        table.insert(LtexExtra.task_queue, { fun = callback, args = args })
+    end
+end
+
+function LtexExtra:ResolvePendingTasks()
+    for _, task in pairs(LtexExtra.task_queue) do
+        LoggerBuilder.log.trace(task)
+        task.fun(task.args)
+    end
 end
 
 ---@return vim.lsp.Client|nil client Ltex client if found
@@ -40,6 +60,12 @@ function LtexExtra:GetLtexClient()
     return ltex_client
 end
 
+---@param client vim.lsp.Client
+function LtexExtra:SetLtexClient(client)
+    LtexExtra.ltex_client = client
+    LtexExtra:ResolvePendingTasks()
+end
+
 --TODO: Evaluate if we need to listen the LspDetach event
 function LtexExtra:ListenLtexAttach()
     vim.api.nvim_create_autocmd("LspAttach", {
@@ -47,7 +73,7 @@ function LtexExtra:ListenLtexAttach()
         callback = function(args)
             local client = vim.lsp.get_client_by_id(args.data.client_id)
             if client ~= nil and client.name == "ltex" then
-                LtexExtra.ltex_client = client
+                LtexExtra:SetLtexClient(client)
                 LoggerBuilder.log.info(string.format("LtexExtra attached to ltex client", client.name))
             end
         end,
@@ -64,13 +90,8 @@ end
 
 ---@return boolean status: True as OK, false if it's waiting for ltex attach
 function LtexExtra:TriggerLoadLtexFiles()
-    if LtexExtra.ltex_client then
-        ltex_extra_api.reload(LtexExtra.opts.load_langs)
-        return true
-    else
-        LtexExtra:ListenLtexAttach()
-        return false
-    end
+    LtexExtra:PushTask(ltex_extra_api.reload, LtexExtra.opts.load_langs)
+    return false
 end
 
 function LtexExtra:RegisterAutocommands()
@@ -116,6 +137,10 @@ end
 
 function ltex_extra_api.get_opts()
     return LtexExtra.opts
+end
+
+function ltex_extra_api.get_ltex_client()
+    return LtexExtra:GetLtexClient()
 end
 
 function ltex_extra_api.__debug_reset()
