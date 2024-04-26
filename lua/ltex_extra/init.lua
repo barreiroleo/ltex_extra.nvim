@@ -48,9 +48,16 @@ function LtexExtra:ResolvePendingTasks()
     end
 end
 
+---TODO: Remove get_active_clients when 0.10 is released
 ---@return vim.lsp.Client|nil client Ltex client if found
 function LtexExtra:GetLtexClient()
-    local ltex_client = vim.lsp.get_clients({ name = 'ltex' })[1]
+    local ltex_client = nil
+    if vim.lsp.get_clients then
+        ltex_client = vim.lsp.get_clients({ name = 'ltex' })[1]
+    else
+        ltex_client = vim.lsp.get_active_clients({ name = 'ltex' })[1]
+    end
+
     if ltex_client then
         LoggerBuilder.log.debug("Ltex client found at client id " .. ltex_client.id)
     else
