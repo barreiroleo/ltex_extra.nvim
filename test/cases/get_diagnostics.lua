@@ -18,5 +18,4 @@ params["context"] = {
 }
 
 vim.api.nvim_win_set_cursor(win, { 9, 10 })
-local ltex_code_actions = get_code_actions(ltex_client.id, params, test_bufnr)
-P(ltex_code_actions)
+get_code_actions(ltex_client.id, params, test_bufnr)

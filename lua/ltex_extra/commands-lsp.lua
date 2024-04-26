@@ -22,6 +22,7 @@ local types = {
     ["hRules"] = "hiddenFalsePositives",
 }
 
+---@param client vim.lsp.Client
 local function get_settings(client)
     if not client.config.settings.ltex then
         client.config.settings.ltex = {}
@@ -34,6 +35,8 @@ local function get_settings(client)
     return client.config.settings
 end
 
+---@param client vim.lsp.Client
+---@param lang language
 local function update_dictionary(client, lang)
     log.trace("update_dictionary")
     local settings = get_settings(client)
@@ -42,6 +45,8 @@ local function update_dictionary(client, lang)
     return client.notify("workspace/didChangeConfiguration", settings)
 end
 
+---@param client vim.lsp.Client
+---@param lang language
 local function update_disabledRules(client, lang)
     log.trace("update_disabledRules")
     local settings = get_settings(client)
@@ -50,6 +55,8 @@ local function update_disabledRules(client, lang)
     return client.notify("workspace/didChangeConfiguration", settings)
 end
 
+---@param client vim.lsp.Client
+---@param lang language
 local function update_hiddenFalsePositive(client, lang)
     log.trace("update_hiddenFalsePositive")
     local settings = get_settings(client)
@@ -78,6 +85,7 @@ function M.updateConfig(configtype, lang)
     end
 end
 
+---@param langs language[]
 function M.reload(langs)
     log.trace("updateConfigFull")
     langs = langs or ltex_extra_api.__get_opts().load_langs
@@ -92,6 +100,7 @@ function M.reload(langs)
     end
 end
 
+---@param command  AddToDictionaryCommandParams
 function M.addToDictionary(command)
     log.trace("addToDictionary")
     local args = command.arguments[1].words
@@ -104,6 +113,7 @@ function M.addToDictionary(command)
     end
 end
 
+---@param command DisableRulesCommandParams
 function M.disableRules(command)
     log.trace("disableRules")
     local args = command.arguments[1].ruleIds
@@ -116,6 +126,7 @@ function M.disableRules(command)
     end
 end
 
+---@param command HideFalsePositivesCommandParams
 function M.hideFalsePositives(command)
     log.trace("hideFalsePositives")
     local args = command.arguments[1].falsePositives
