@@ -1,7 +1,8 @@
-vim.opt.runtimepath:append(".")
-
 vim.o.swapfile = false
-vim.bo.swapfile = false
+vim.opt.runtimepath:append(".")
+vim.opt.runtimepath:append("../plenary.nvim")
+vim.cmd[[runtime! plugin/plenary.vim]]
+
 
 function reset_editor()
     vim.notify("Reset editor", vim.log.levels.WARN)
@@ -17,4 +18,4 @@ function reset_editor()
     end
 end
 
-reset_editor()
+-- reset_editor()
