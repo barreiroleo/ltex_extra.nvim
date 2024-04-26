@@ -86,8 +86,8 @@ function LtexExtra:ListenLtexAttach()
         callback = function(args)
             local client = vim.lsp.get_client_by_id(args.data.client_id)
             if client ~= nil and client.name == "ltex" then
-                LtexExtra:SetLtexClient(client)
-                LoggerBuilder.log.info(string.format("LtexExtra attached to ltex client", client.name))
+                vim.defer_fn(function() LtexExtra:SetLtexClient(client) end, 1000)
+                LoggerBuilder.log.info(string.format("Client %d attached to ltex server", client.id))
             end
         end,
     })
@@ -106,9 +106,8 @@ function LtexExtra:RegisterAutocommands()
         LoggerBuilder.log.info(string.format("LtexExtraReload: Reloading %s ", vim.inspect(langs)))
         ltex_extra_api.reload(langs)
     end, {
-        nargs = "*", -- 0,1, or many
-        -- selene: allow(unused_variable)
-        complete = function(arglead, cmdline, cursorpos)
+        nargs = "*",
+        complete = function()
             return LtexExtra.opts.load_langs
         end
     })
@@ -121,10 +120,10 @@ function LtexExtra:RegisterClientMethods()
     vim.lsp.commands["_ltex.disableRules"] = require("ltex_extra.commands-lsp").disableRules
 end
 
----@return boolean status: True as OK, false if it's waiting for ltex attach
+---@return boolean status: True if the async task was enqueued
 function LtexExtra:TriggerLoadLtexFiles()
     LtexExtra:PushTask(ltex_extra_api.reload, LtexExtra.opts.load_langs)
-    return false
+    return true
 end
 
 function ltex_extra_api.setup(opts)
