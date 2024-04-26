@@ -1,3 +1,15 @@
+-- The official vsco** extension does more or less the following:
+-- At client start, sets the special capability:
+--      ltex/workspaceSpecificationConfiguration` and binds a handler as callback.
+-- After executing a client command calls in order the `addToLanguageSpecificSetting` & `checkCurrentDocument`
+-- `addToLanguageSpecificSetting` (uri, action, args) => (uri, 'dictionary', params.words)
+--      This adds the langs settings to an external file or an interal settings, depends on the config.
+--      The external export, adds the settings to the internal settings at the ends anyways.
+--      The interal save, calls a clean up for the workspace.
+-- `checkCurrentDocument` (): Calls checkDocument(uri, languageId, text): This method send a request as follows:
+--      sendRequest(method:"workspace/executeCommand",command:"_ltex.checkDocument", arguments: uri)
+
+
 local log = require("ltex_extra.utils.log").log
 local ltex_extra_api = require("ltex_extra")
 

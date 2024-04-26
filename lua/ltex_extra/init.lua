@@ -6,15 +6,21 @@ local legacy_opts = require("ltex_extra.opts").legacy_def_opts
 ---@field __index LtexExtraMgr Singleton instance
 ---@field opts LtexExtraOpts Full options table
 ---@field augroup_id integer Autocommands group id
----@field ltex_client vim.lsp.Client | nil Client attached to Ltex server
----@field task_queue table{fun: fun(...), args: table{any}}
+---@field ltex_client vim.lsp.Client|nil Client attached to Ltex server
+---@field task_queue {fun: fun(...), args: any} Task queue for pending task
 local LtexExtra = {}
 
 ---LtexExtraApi. Public endpoint to interact with LtexExtra via `require("ltex_extra")`.
 ---@class LtexExtraApi
----@field setup fun(opts: LtexExtraOpts | nil): boolean
+---@field setup fun(opts: LtexExtraOpts|nil): boolean
 ---@field reload fun(...)
+---@field check_document fun()
+---@field get_server_status fun(): { err: lsp.ResponseError|nil, result: any }|nil
+---@field __get_ltex_client fun(): vim.lsp.Client|nil
 ---@field __get_opts fun(): LtexExtraOpts
+---@field __debug_inspect_capabilities fun(): {client: any, server: any, dynamic: any}
+---@field __debug_inspect_client_settings fun(): table?
+---@field __debug_reset any
 local ltex_extra_api = {}
 
 ---@param opts LtexExtraOpts
@@ -153,8 +159,7 @@ function ltex_extra_api.check_document()
     return client.request_sync(method, { command = command, arguments = params }, nil, bufnr)
 end
 
----@return { err: lsp.ResponseError|nil, result: any }|nil
-function ltex_extra_api.server_status()
+function ltex_extra_api.get_server_status()
     local client = LtexExtra:GetLtexClient()
     if not client then
         LoggerBuilder.log.warn("Cannot request the server status. Client not available.")
@@ -166,17 +171,12 @@ function ltex_extra_api.server_status()
     return client.request_sync(method, { command = command, arguments = params }, nil, bufnr)
 end
 
-function ltex_extra_api.__get_opts()
-    return LtexExtra.opts
-end
-
 function ltex_extra_api.__get_ltex_client()
     return LtexExtra:GetLtexClient()
 end
 
-function ltex_extra_api.__debug_reset()
-    require("plenary.reload").reload_module("ltex_extra")
-    require("plenary.reload").reload_module("plenary.log")
+function ltex_extra_api.__get_opts()
+    return LtexExtra.opts
 end
 
 function ltex_extra_api.__debug_inspect_capabilities()
@@ -195,4 +195,10 @@ function ltex_extra_api.__debug_inspect_client_settings()
     assert(client ~= nil and client.config ~= nil, "Client not available")
     return client.config.settings
 end
+
+function ltex_extra_api.__debug_reset()
+    require("plenary.reload").reload_module("ltex_extra")
+    require("plenary.reload").reload_module("plenary.log")
+end
+
 return ltex_extra_api
