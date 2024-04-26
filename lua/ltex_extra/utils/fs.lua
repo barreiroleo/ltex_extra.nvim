@@ -1,5 +1,5 @@
 local log = require("ltex_extra.utils.log").log
-local config_path = require("ltex_extra").get_opts().path
+local config_path = require("ltex_extra").__get_opts().path
 local uv = vim.loop
 
 local M = {}

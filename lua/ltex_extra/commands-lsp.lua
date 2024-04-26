@@ -50,7 +50,7 @@ local M = {}
 
 function M.updateConfig(configtype, lang)
     log.trace("updateConfig")
-    local client = ltex_extra_api.get_ltex_client()
+    local client = ltex_extra_api.__get_ltex_client()
     if client then
         if configtype == types.dict then
             update_dictionary(client, lang)
@@ -68,7 +68,7 @@ end
 
 function M.reload(langs)
     log.trace("updateConfigFull")
-    langs = langs or ltex_extra_api.get_opts().load_langs
+    langs = langs or ltex_extra_api.__get_opts().load_langs
     for _, lang in pairs(langs) do
         lang = string.lower(lang)
         log.trace(string.format("Loading %s", lang))

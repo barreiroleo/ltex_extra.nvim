@@ -14,7 +14,7 @@ local LtexExtra = {}
 ---@class LtexExtraApi
 ---@field setup fun(opts: LtexExtraOpts | nil): boolean
 ---@field reload fun(...)
----@field get_opts fun(): LtexExtraOpts
+---@field __get_opts fun(): LtexExtraOpts
 local ltex_extra_api = {}
 
 ---@param opts LtexExtraOpts
@@ -140,11 +140,37 @@ function ltex_extra_api.reload(...)
     require("ltex_extra.commands-lsp").reload(...)
 end
 
-function ltex_extra_api.get_opts()
+---@return { err: lsp.ResponseError|nil, result: any }|nil
+function ltex_extra_api.check_document()
+    local client = LtexExtra:GetLtexClient()
+    if not client then
+        LoggerBuilder.log.warn("Cannot request document check. Client not available.")
+        return
+    end
+    local bufnr = vim.api.nvim_get_current_buf()
+    local params = vim.lsp.util.make_text_document_params(bufnr)
+    local method, command = "workspace/executeCommand", "_ltex.checkDocument"
+    return client.request_sync(method, { command = command, arguments = params }, nil, bufnr)
+end
+
+---@return { err: lsp.ResponseError|nil, result: any }|nil
+function ltex_extra_api.server_status()
+    local client = LtexExtra:GetLtexClient()
+    if not client then
+        LoggerBuilder.log.warn("Cannot request the server status. Client not available.")
+        return
+    end
+    local bufnr = vim.api.nvim_get_current_buf()
+    local params = vim.lsp.util.make_text_document_params(bufnr)
+    local method, command = "workspace/executeCommand", "_ltex.getServerStatus"
+    return client.request_sync(method, { command = command, arguments = params }, nil, bufnr)
+end
+
+function ltex_extra_api.__get_opts()
     return LtexExtra.opts
 end
 
-function ltex_extra_api.get_ltex_client()
+function ltex_extra_api.__get_ltex_client()
     return LtexExtra:GetLtexClient()
 end
 
@@ -153,4 +179,20 @@ function ltex_extra_api.__debug_reset()
     require("plenary.reload").reload_module("plenary.log")
 end
 
+function ltex_extra_api.__debug_inspect_capabilities()
+    local client = LtexExtra:GetLtexClient()
+    assert(client ~= nil, "Client not available")
+    local capabilities = {
+        client = client.capabilities,
+        server = client.server_capabilities,
+        dynamic = client.dynamic_capabilities
+    }
+    return capabilities
+end
+
+function ltex_extra_api.__debug_inspect_client_settings()
+    local client = LtexExtra:GetLtexClient()
+    assert(client ~= nil and client.config ~= nil, "Client not available")
+    return client.config.settings
+end
 return ltex_extra_api
