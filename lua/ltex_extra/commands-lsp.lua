@@ -9,7 +9,6 @@
 -- `checkCurrentDocument` (): Calls checkDocument(uri, languageId, text): This method send a request as follows:
 --      sendRequest(method:"workspace/executeCommand",command:"_ltex.checkDocument", arguments: uri)
 
-
 local log = require("ltex_extra.utils.log").log
 local ltex_extra_api = require("ltex_extra")
 
@@ -23,23 +22,10 @@ local types = {
 }
 
 ---@param client vim.lsp.Client
-local function get_settings(client)
-    if not client.config.settings.ltex then
-        client.config.settings.ltex = {}
-    end
-    for _, index in pairs(types) do
-        if not client.config.settings.ltex[index] then
-            client.config.settings.ltex[index] = {}
-        end
-    end
-    return client.config.settings
-end
-
----@param client vim.lsp.Client
 ---@param lang language
 local function update_dictionary(client, lang)
     log.trace("update_dictionary")
-    local settings = get_settings(client)
+    local settings = ltex_extra_api.get_ltex_settings()
     settings.ltex.dictionary[lang] = loadFile(types.dict, lang)
     log.debug(vim.inspect(settings.ltex.dictionary))
     return client.notify("workspace/didChangeConfiguration", settings)
@@ -49,7 +35,7 @@ end
 ---@param lang language
 local function update_disabledRules(client, lang)
     log.trace("update_disabledRules")
-    local settings = get_settings(client)
+    local settings = ltex_extra_api.get_ltex_settings()
     settings.ltex.disabledRules[lang] = loadFile(types.dRules, lang)
     log.debug(vim.inspect(settings.ltex.disabledRules))
     return client.notify("workspace/didChangeConfiguration", settings)
@@ -59,7 +45,7 @@ end
 ---@param lang language
 local function update_hiddenFalsePositive(client, lang)
     log.trace("update_hiddenFalsePositive")
-    local settings = get_settings(client)
+    local settings = ltex_extra_api.get_ltex_settings()
     settings.ltex.hiddenFalsePositives[lang] = loadFile(types.hRules, lang)
     log.debug(vim.inspect(settings.ltex.hiddenFalsePositives))
     return client.notify("workspace/didChangeConfiguration", settings)
@@ -69,7 +55,7 @@ local M = {}
 
 function M.updateConfig(configtype, lang)
     log.trace("updateConfig")
-    local client = ltex_extra_api.__get_ltex_client()
+    local client = ltex_extra_api.get_ltex_client()
     if client then
         if configtype == types.dict then
             update_dictionary(client, lang)
@@ -88,7 +74,7 @@ end
 ---@param langs language[]
 function M.reload(langs)
     log.trace("updateConfigFull")
-    langs = langs or ltex_extra_api.__get_opts().load_langs
+    langs = langs or ltex_extra_api.get_opts().load_langs
     for _, lang in pairs(langs) do
         lang = string.lower(lang)
         log.trace(string.format("Loading %s", lang))

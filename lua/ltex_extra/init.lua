@@ -1,6 +1,9 @@
 local LoggerBuilder = require("ltex_extra.utils.log")
 local legacy_opts = require("ltex_extra.opts").legacy_def_opts
 
+---@alias LtexClientSettings {ltex: {dictionary: content, hiddenFalsePositives: content, disabledRules: content }}
+---@alias content {[string]: string[]}
+
 ---LtexExtra manager.
 ---@class LtexExtraMgr
 ---@field __index LtexExtraMgr Singleton instance
@@ -16,8 +19,8 @@ local LtexExtra = {}
 ---@field reload fun(...)
 ---@field check_document fun()
 ---@field get_server_status fun(): { err: lsp.ResponseError|nil, result: any }|nil
----@field __get_ltex_client fun(): vim.lsp.Client|nil
----@field __get_opts fun(): LtexExtraOpts
+---@field get_ltex_client fun(): vim.lsp.Client|nil
+---@field get_opts fun(): LtexExtraOpts
 ---@field __debug_inspect_capabilities fun(): {client: any, server: any, dynamic: any}
 ---@field __debug_inspect_client_settings fun(): table?
 ---@field __debug_reset any
@@ -170,12 +173,24 @@ function ltex_extra_api.get_server_status()
     return client.request_sync(method, { command = command, arguments = params }, nil, bufnr)
 end
 
-function ltex_extra_api.__get_ltex_client()
+function ltex_extra_api.get_ltex_client()
     return LtexExtra:GetLtexClient()
 end
 
-function ltex_extra_api.__get_opts()
+function ltex_extra_api.get_opts()
     return LtexExtra.opts
+end
+
+---@return LtexClientSettings
+function ltex_extra_api.get_ltex_settings()
+    local client = LtexExtra:GetLtexClient()
+    assert(client ~= nil, "Error getting Ltex settings. Client not available")
+    client.settings.ltex = vim.tbl_deep_extend("keep", client.settings.ltex, {
+        dictionary = {},
+        hiddenFalsePositives = {},
+        disabledRules = {}
+    })
+    return client.settings
 end
 
 function ltex_extra_api.__debug_inspect_capabilities()
@@ -191,13 +206,16 @@ end
 
 function ltex_extra_api.__debug_inspect_client_settings()
     local client = LtexExtra:GetLtexClient()
-    assert(client ~= nil and client.config ~= nil, "Client not available")
-    return client.config.settings
+    assert(client ~= nil and client ~= nil, "Client not available")
+    return client.settings
 end
 
 function ltex_extra_api.__debug_reset()
     require("plenary.reload").reload_module("ltex_extra")
     require("plenary.reload").reload_module("plenary.log")
 end
+
+vim.api.nvim_create_user_command("LtexExtraTest", function() end, {})
+
 
 return ltex_extra_api
