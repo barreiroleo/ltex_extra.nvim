@@ -25,17 +25,23 @@ local types = {
 ---@param lang language
 local function update_dictionary(client, lang)
     log.trace("update_dictionary")
-    local settings = ltex_extra_api.get_ltex_settings()
-    settings.ltex.dictionary[lang] = loadFile(types.dict, lang)
-    log.debug(vim.inspect(settings.ltex.dictionary))
-    return client.notify("workspace/didChangeConfiguration", settings)
+    local settings = ltex_extra_api.get_ltex_client().settings
+    local content = loadFile(types.dict, lang)
+    if not settings.ltex.dictionary then
+        settings.ltex.dictionary = {}
+    end
+    settings.ltex.dictionary[lang] = content
+    return client.notify("workspace/didChangeConfiguration", ltex_extra_api.get_internal_settings())
 end
 
 ---@param client vim.lsp.Client
 ---@param lang language
 local function update_disabledRules(client, lang)
     log.trace("update_disabledRules")
-    local settings = ltex_extra_api.get_ltex_settings()
+    local settings = ltex_extra_api.get_ltex_client().settings
+    if not settings.ltex.disabledRules then
+        settings.ltex.disabledRules = {}
+    end
     settings.ltex.disabledRules[lang] = loadFile(types.dRules, lang)
     log.debug(vim.inspect(settings.ltex.disabledRules))
     return client.notify("workspace/didChangeConfiguration", settings)
@@ -45,7 +51,10 @@ end
 ---@param lang language
 local function update_hiddenFalsePositive(client, lang)
     log.trace("update_hiddenFalsePositive")
-    local settings = ltex_extra_api.get_ltex_settings()
+    local settings = ltex_extra_api.get_ltex_client().settings
+    if not settings.ltex.hiddenFalsePositives then
+        settings.ltex.hiddenFalsePositives = {}
+    end
     settings.ltex.hiddenFalsePositives[lang] = loadFile(types.hRules, lang)
     log.debug(vim.inspect(settings.ltex.hiddenFalsePositives))
     return client.notify("workspace/didChangeConfiguration", settings)
@@ -76,7 +85,7 @@ function M.reload(langs)
     log.trace("updateConfigFull")
     langs = langs or ltex_extra_api.get_opts().load_langs
     for _, lang in pairs(langs) do
-        lang = string.lower(lang)
+        -- lang = string.lower(lang)
         log.trace(string.format("Loading %s", lang))
         vim.schedule(function()
             M.updateConfig(types.dict, lang)
@@ -94,6 +103,7 @@ function M.addToDictionary(command)
         log.debug(string.format("Lang: %s Words: %s", vim.inspect(lang), vim.inspect(words)))
         exportFile(types.dict, lang, words)
         vim.schedule(function()
+            ltex_extra_api.push_setting(types.dict, lang, words)
             M.updateConfig(types.dict, lang)
         end)
     end
@@ -107,7 +117,8 @@ function M.disableRules(command)
         log.debug(string.format("Lang: %s Rules: %s", vim.inspect(lang), vim.inspect(rules)))
         exportFile(types.dRules, lang, rules)
         vim.schedule(function()
-            M.updateConfig(types.dRules, lang)
+            M.updateConfig(types.hRules, lang)
+            ltex_extra_api.push_setting(types.hRules, lang, rules)
         end)
     end
 end
@@ -120,9 +131,12 @@ function M.hideFalsePositives(command)
         log.debug(string.format("Lang: %s Rules: %s", vim.inspect(lang), vim.inspect(rules)))
         exportFile(types.hRules, lang, rules)
         vim.schedule(function()
+            ltex_extra_api.push_setting(types.hRules, lang, rules)
             M.updateConfig(types.hRules, lang)
         end)
     end
 end
+
+-- M.hideFalsePositives(require("ltex_extra.test.commands").HideFalsePositives)
 
 return M

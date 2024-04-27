@@ -1,6 +1,30 @@
 local LoggerBuilder = require("ltex_extra.utils.log")
 local legacy_opts = require("ltex_extra.opts").legacy_def_opts
 
+local legacy_settings = {
+    ltex = {
+        dictionary = {
+            ["en-US"] = { "missspelling", "errorr" },
+            ["es-AR"] = {}
+        },
+        disabledRules = {
+            ["es-AR"] = {}
+        },
+        enabled = { "bibtex", "gitcommit", "markdown", "org", "tex", "restructuredtext", "rsweave", "latex", "quarto", "rmd", "context", "html", "xhtml", "mail", "plaintext" },
+        hiddenFalsePositives = {
+            ["es-AR"] = {}
+        },
+        settings = {
+            additionalRules = {
+                enablePickyRules = true,
+                motherTongue = "es-AR"
+            },
+            checkFrequency = "save",
+            language = "es-AR"
+        }
+    }
+}
+
 ---@alias LtexClientSettings {ltex: {dictionary: content, hiddenFalsePositives: content, disabledRules: content }}
 ---@alias content {[string]: string[]}
 
@@ -11,9 +35,7 @@ local legacy_opts = require("ltex_extra.opts").legacy_def_opts
 ---@field augroup_id integer Autocommands group id
 ---@field ltex_client vim.lsp.Client|nil Client attached to Ltex server
 ---@field task_queue {fun: fun(...), args: any} Task queue for pending task
----TODO: This should be used to sync against the server instead of reading the files from disk.
----Also this should be updated on each client-command request handleded.
----@field internal_ltex_settings LtexClientSettings Internal representation of custom settings.
+---@field internal_settings LtexClientSettings Internal representation of custom settings.
 local LtexExtra = {}
 
 ---LtexExtraApi. Public endpoint to interact with LtexExtra via `require("ltex_extra")`.
@@ -38,7 +60,7 @@ function LtexExtra:new(opts)
         self.augroup_id = vim.api.nvim_create_augroup("LtexExtra", { clear = false })
         self.ltex_client = self:GetLtexClient()
         self.task_queue = {}
-        self.internal_ltex_settings = {}
+        self.internal_settings = {}
     end
     return self
 end
@@ -84,17 +106,39 @@ end
 function LtexExtra:SetLtexClient(client)
     LtexExtra.ltex_client = client
     LtexExtra:ResolvePendingTasks()
-    LtexExtra:SyncInternalState(client.settings)
+    local disk_settings = LtexExtra:GetSettingsFromFile()
+    LtexExtra:SetLtexSettings(disk_settings)
 end
 
 ---@param settings LtexClientSettings
-function LtexExtra:SyncInternalState(settings)
-    assert(settings.ltex ~= nil, "Error reading ltex settings")
-    LtexExtra.internal_ltex_settings = vim.tbl_deep_extend("keep", settings.ltex, {
-        dictionary = {},
-        hiddenFalsePositives = {},
-        disabledRules = {}
-    })
+function LtexExtra:SetLtexSettings(settings)
+    local client = LtexExtra:GetLtexClient()
+    assert(client, "Client not available")
+    LtexExtra.internal_settings = vim.tbl_deep_extend("force", client.settings, settings)
+    LtexExtra:SyncInternalState()
+end
+
+function LtexExtra:GetLtexSettings()
+    return LtexExtra.internal_settings
+end
+
+function LtexExtra:SyncInternalState()
+    local client = ltex_extra_api.get_ltex_client()
+    assert(client ~= nil, "Error to sync setings. Client not available")
+    return client.notify("workspace/didChangeConfiguration", LtexExtra:GetLtexSettings())
+end
+
+--return LtexClientSettings
+function LtexExtra:GetSettingsFromFile()
+    local fs_loadFile = require("ltex_extra.utils.fs").loadFile
+    ---@type LtexClientSettings
+    local settings = { ltex = { dictionary = {}, disabledRules = {}, hiddenFalsePositives = {} } }
+    for _, lang in pairs(LtexExtra.opts.load_langs) do
+        settings.ltex.dictionary[lang] = fs_loadFile("dictionary", lang)
+        settings.ltex.disabledRules[lang] = fs_loadFile("disabledRules", lang)
+        settings.ltex.hiddenFalsePositives[lang] = fs_loadFile("hiddenFalsePositives", lang)
+    end
+    return settings
 end
 
 --TODO: Evaluate if we need to listen the LspDetach event
@@ -196,24 +240,6 @@ function ltex_extra_api.get_opts()
     return LtexExtra.opts
 end
 
----@return LtexClientSettings
-function ltex_extra_api.get_ltex_settings()
-    local client = LtexExtra:GetLtexClient()
-    assert(client ~= nil, "Error getting Ltex settings. Client not available")
-    -- TODO: Use the internal representation instead
-    client.settings.ltex = vim.tbl_deep_extend("keep", client.settings.ltex, {
-        dictionary = {},
-        hiddenFalsePositives = {},
-        disabledRules = {}
-    })
-    return client.settings
-end
-
----@param settings LtexClientSettings
-function ltex_extra_api.sync_ltex_settings(settings)
-    return LtexExtra:SyncInternalState(settings)
-end
-
 function ltex_extra_api.__debug_inspect_capabilities()
     local client = LtexExtra:GetLtexClient()
     assert(client ~= nil, "Client not available")
@@ -238,5 +264,19 @@ end
 
 vim.api.nvim_create_user_command("LtexExtraTest", function() end, {})
 
+---@param type "dictionary"| "disabledRules"| "hiddenFalsePositives",
+---@param lang language
+---@param content string[]
+function ltex_extra_api.push_setting(type, lang, content)
+    local settings = vim.tbl_deep_extend("keep", LtexExtra:GetLtexSettings(), {
+        ltex = { [type] = { [lang] = {} } }
+    })
+    vim.list_extend(settings.ltex[type][lang], content)
+    LtexExtra:SetLtexSettings(settings)
+end
+
+function ltex_extra_api.get_internal_settings()
+    return LtexExtra:GetLtexSettings()
+end
 
 return ltex_extra_api

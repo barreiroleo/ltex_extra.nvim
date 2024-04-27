@@ -1,8 +1,8 @@
 ---
 # Uncomment en-US to switch ltex language
 # Execute after delete ltex files: require("ltex_extra").reload()
-lang: en-us
-# lang: es-ar
+lang: en-US
+# lang: es-AR
 ---
 
 1- Add word to dictionary
@@ -17,4 +17,4 @@ esta oración debe comenzar con mayúsculas.
 This rule' going to be disabled.
 Esta regla sera desactivada.
 
-<!-- vim: set foldlevel=99 nomodifiable: -->
+<!-- vim: set foldlevel=99 nomodifiable nospell: -->

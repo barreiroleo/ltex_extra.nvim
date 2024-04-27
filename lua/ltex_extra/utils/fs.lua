@@ -133,6 +133,8 @@ end
 
 -- Return the content of a required type and lang.
 -- If the file doesn't exist, return empty table.
+---@param type "dictionary"| "disabledRules"| "hiddenFalsePositives",
+---@param lang language
 M.loadFile = function(type, lang)
     log.trace("Loading ", type, lang)
     local content = {}
