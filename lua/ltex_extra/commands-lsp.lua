@@ -26,11 +26,7 @@ local types = {
 local function update_dictionary(client, lang)
     log.trace("update_dictionary")
     local settings = ltex_extra_api.get_ltex_client().settings
-    local content = loadFile(types.dict, lang)
-    if not settings.ltex.dictionary then
-        settings.ltex.dictionary = {}
-    end
-    settings.ltex.dictionary[lang] = content
+    settings.ltex = ltex_extra_api.get_internal_settings().ltex
     return client.notify("workspace/didChangeConfiguration", ltex_extra_api.get_internal_settings())
 end
 
@@ -43,7 +39,6 @@ local function update_disabledRules(client, lang)
         settings.ltex.disabledRules = {}
     end
     settings.ltex.disabledRules[lang] = loadFile(types.dRules, lang)
-    log.debug(vim.inspect(settings.ltex.disabledRules))
     return client.notify("workspace/didChangeConfiguration", settings)
 end
 
@@ -104,7 +99,7 @@ function M.addToDictionary(command)
         exportFile(types.dict, lang, words)
         vim.schedule(function()
             ltex_extra_api.push_setting(types.dict, lang, words)
-            M.updateConfig(types.dict, lang)
+            -- M.updateConfig(types.dict, lang)
         end)
     end
 end

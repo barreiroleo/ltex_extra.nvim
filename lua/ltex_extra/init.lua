@@ -125,6 +125,7 @@ end
 function LtexExtra:SyncInternalState()
     local client = ltex_extra_api.get_ltex_client()
     assert(client ~= nil, "Error to sync setings. Client not available")
+    client.settings.ltex = LtexExtra:GetLtexSettings().ltex
     return client.notify("workspace/didChangeConfiguration", LtexExtra:GetLtexSettings())
 end
 
