@@ -11,6 +11,9 @@ local legacy_opts = require("ltex_extra.opts").legacy_def_opts
 ---@field augroup_id integer Autocommands group id
 ---@field ltex_client vim.lsp.Client|nil Client attached to Ltex server
 ---@field task_queue {fun: fun(...), args: any} Task queue for pending task
+---TODO: This should be used to sync against the server instead of reading the files from disk.
+---Also this should be updated on each client-command request handleded.
+---@field internal_ltex_settings LtexClientSettings Internal representation of custom settings.
 local LtexExtra = {}
 
 ---LtexExtraApi. Public endpoint to interact with LtexExtra via `require("ltex_extra")`.
@@ -35,6 +38,7 @@ function LtexExtra:new(opts)
         self.augroup_id = vim.api.nvim_create_augroup("LtexExtra", { clear = false })
         self.ltex_client = self:GetLtexClient()
         self.task_queue = {}
+        self.internal_ltex_settings = {}
     end
     return self
 end
@@ -80,6 +84,17 @@ end
 function LtexExtra:SetLtexClient(client)
     LtexExtra.ltex_client = client
     LtexExtra:ResolvePendingTasks()
+    LtexExtra:SyncInternalState(client.settings)
+end
+
+---@param settings LtexClientSettings
+function LtexExtra:SyncInternalState(settings)
+    assert(settings.ltex ~= nil, "Error reading ltex settings")
+    LtexExtra.internal_ltex_settings = vim.tbl_deep_extend("keep", settings.ltex, {
+        dictionary = {},
+        hiddenFalsePositives = {},
+        disabledRules = {}
+    })
 end
 
 --TODO: Evaluate if we need to listen the LspDetach event
@@ -185,12 +200,18 @@ end
 function ltex_extra_api.get_ltex_settings()
     local client = LtexExtra:GetLtexClient()
     assert(client ~= nil, "Error getting Ltex settings. Client not available")
+    -- TODO: Use the internal representation instead
     client.settings.ltex = vim.tbl_deep_extend("keep", client.settings.ltex, {
         dictionary = {},
         hiddenFalsePositives = {},
         disabledRules = {}
     })
     return client.settings
+end
+
+---@param settings LtexClientSettings
+function ltex_extra_api.sync_ltex_settings(settings)
+    return LtexExtra:SyncInternalState(settings)
 end
 
 function ltex_extra_api.__debug_inspect_capabilities()
