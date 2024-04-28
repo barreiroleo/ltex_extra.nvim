@@ -14,31 +14,7 @@ local ltex_extra_api = require("ltex_extra")
 
 local exportFile = require("ltex_extra.utils.fs").exportFile
 
-local types = {
-    ["dict"] = "dictionary",
-    ["dRules"] = "disabledRules",
-    ["hRules"] = "hiddenFalsePositives",
-}
-
----@param client vim.lsp.Client
-local function update_settings(client)
-    log.trace("update_dictionary")
-    local settings = ltex_extra_api.get_ltex_client().settings
-    settings.ltex = ltex_extra_api.get_internal_settings().ltex
-    return client.notify("workspace/didChangeConfiguration", ltex_extra_api.get_internal_settings())
-end
-
 local M = {}
-
-function M.updateConfig()
-    log.trace("updateConfig")
-    local client = ltex_extra_api.get_ltex_client()
-    if client then
-        update_settings(client)
-    else
-        return error("Error catching ltex client", 1)
-    end
-end
 
 ---@param langs language[]
 function M.reload(langs)
@@ -47,7 +23,7 @@ function M.reload(langs)
     for _, lang in pairs(langs) do
         log.trace(string.format("Loading %s", lang))
         vim.schedule(function()
-            M.updateConfig()
+            ltex_extra_api.request_sync()
         end)
     end
 end
@@ -58,9 +34,9 @@ function M.addToDictionary(command)
     local args = command.arguments[1].words
     for lang, words in pairs(args) do
         log.debug(string.format("Lang: %s Words: %s", vim.inspect(lang), vim.inspect(words)))
-        exportFile(types.dict, lang, words)
+        exportFile("dictionary", lang, words)
         vim.schedule(function()
-            ltex_extra_api.push_setting(types.dict, lang, words)
+            ltex_extra_api.push_setting("dictionary", lang, words)
         end)
     end
 end
@@ -71,9 +47,9 @@ function M.disableRules(command)
     local args = command.arguments[1].ruleIds
     for lang, rules in pairs(args) do
         log.debug(string.format("Lang: %s Rules: %s", vim.inspect(lang), vim.inspect(rules)))
-        exportFile(types.dRules, lang, rules)
+        exportFile("disabledRules", lang, rules)
         vim.schedule(function()
-            ltex_extra_api.push_setting(types.dRules, lang, rules)
+            ltex_extra_api.push_setting("disabledRules", lang, rules)
         end)
     end
 end
@@ -84,9 +60,9 @@ function M.hideFalsePositives(command)
     local args = command.arguments[1].falsePositives
     for lang, rules in pairs(args) do
         log.debug(string.format("Lang: %s Rules: %s", vim.inspect(lang), vim.inspect(rules)))
-        exportFile(types.hRules, lang, rules)
+        exportFile("hiddenFalsePositives", lang, rules)
         vim.schedule(function()
-            ltex_extra_api.push_setting(types.hRules, lang, rules)
+            ltex_extra_api.push_setting("hiddenFalsePositives", lang, rules)
         end)
     end
 end

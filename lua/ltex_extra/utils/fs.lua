@@ -83,6 +83,9 @@ M.writeFile = function(filename, lines)
 end
 
 -- Export ltex data depends on the type and lang especified.
+---@param type "dictionary"| "disabledRules"| "hiddenFalsePositives",
+---@param lang language
+---@param lines string[]
 M.exportFile = function(type, lang, lines)
     log.trace("Exporting ", type, lang, lines)
     local filename = M.joinPath(type, lang)

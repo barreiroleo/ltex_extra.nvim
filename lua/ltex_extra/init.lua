@@ -276,7 +276,7 @@ function ltex_extra_api.push_setting(type, lang, content)
     LtexExtra:SetLtexSettings(settings)
 end
 
-function ltex_extra_api.get_internal_settings()
+function ltex_extra_api.request_sync()
     return LtexExtra:GetLtexSettings()
 end
 
