@@ -1,30 +1,6 @@
 local LoggerBuilder = require("ltex_extra.utils.log")
 local legacy_opts = require("ltex_extra.opts").legacy_def_opts
 
-local legacy_settings = {
-    ltex = {
-        dictionary = {
-            ["en-US"] = { "missspelling", "errorr" },
-            ["es-AR"] = {}
-        },
-        disabledRules = {
-            ["es-AR"] = {}
-        },
-        enabled = { "bibtex", "gitcommit", "markdown", "org", "tex", "restructuredtext", "rsweave", "latex", "quarto", "rmd", "context", "html", "xhtml", "mail", "plaintext" },
-        hiddenFalsePositives = {
-            ["es-AR"] = {}
-        },
-        settings = {
-            additionalRules = {
-                enablePickyRules = true,
-                motherTongue = "es-AR"
-            },
-            checkFrequency = "save",
-            language = "es-AR"
-        }
-    }
-}
-
 ---@alias LtexClientSettings {ltex: {dictionary: content, hiddenFalsePositives: content, disabledRules: content }}
 ---@alias content {[string]: string[]}
 
@@ -44,11 +20,7 @@ local LtexExtra = {}
 ---@field reload fun(...)
 ---@field check_document fun()
 ---@field get_server_status fun(): { err: lsp.ResponseError|nil, result: any }|nil
----@field get_ltex_client fun(): vim.lsp.Client|nil
 ---@field get_opts fun(): LtexExtraOpts
----@field __debug_inspect_capabilities fun(): {client: any, server: any, dynamic: any}
----@field __debug_inspect_client_settings fun(): table?
----@field __debug_reset any
 local ltex_extra_api = {}
 
 ---@param opts LtexExtraOpts
@@ -123,7 +95,7 @@ function LtexExtra:GetLtexSettings()
 end
 
 function LtexExtra:SyncInternalState()
-    local client = ltex_extra_api.get_ltex_client()
+    local client = LtexExtra:GetLtexClient()
     assert(client ~= nil, "Error to sync setings. Client not available")
     client.settings.ltex = LtexExtra:GetLtexSettings().ltex
     return client.notify("workspace/didChangeConfiguration", LtexExtra:GetLtexSettings())
@@ -167,7 +139,7 @@ function LtexExtra:RegisterAutocommands()
             langs = LtexExtra.opts.load_langs
         end
         LoggerBuilder.log.info(string.format("LtexExtraReload: Reloading %s ", vim.inspect(langs)))
-        ltex_extra_api.reload(langs)
+        ltex_extra_api.reload()
     end, {
         nargs = "*",
         complete = function()
@@ -183,38 +155,27 @@ function LtexExtra:RegisterClientMethods()
     vim.lsp.commands["_ltex.disableRules"] = require("ltex_extra.commands-lsp").disableRules
 end
 
----@return boolean status: True if the async task was enqueued
-function LtexExtra:TriggerLoadLtexFiles()
-    LtexExtra:PushTask(ltex_extra_api.reload, LtexExtra.opts.load_langs)
-    return true
-end
-
 function ltex_extra_api.setup(opts)
     opts = vim.tbl_deep_extend("force", legacy_opts, opts or {})
     opts.path = vim.fs.normalize(opts.path)
     -- Initialize the logger
     LoggerBuilder:new({ logLevel = opts.log_level, usePlenary = true })
     LtexExtra:new(opts)
-    -- Create LtexExtra commands: Reload
+    -- Create LtexExtra commands
     LtexExtra:RegisterAutocommands()
     -- Register client side commands
     LtexExtra:RegisterClientMethods()
-    -- Load ltex files
-    LtexExtra:TriggerLoadLtexFiles()
     return true
 end
 
-function ltex_extra_api.reload(...)
-    require("ltex_extra.commands-lsp").reload(...)
+function ltex_extra_api.reload()
+    assert(nil, "Pending implementation")
 end
 
 ---@return { err: lsp.ResponseError|nil, result: any }|nil
 function ltex_extra_api.check_document()
     local client = LtexExtra:GetLtexClient()
-    if not client then
-        LoggerBuilder.log.warn("Cannot request document check. Client not available.")
-        return
-    end
+    assert(client, "Cannot request document check. Client not available.")
     local bufnr = vim.api.nvim_get_current_buf()
     local params = vim.lsp.util.make_text_document_params(bufnr)
     local method, command = "workspace/executeCommand", "_ltex.checkDocument"
@@ -223,47 +184,16 @@ end
 
 function ltex_extra_api.get_server_status()
     local client = LtexExtra:GetLtexClient()
-    if not client then
-        LoggerBuilder.log.warn("Cannot request the server status. Client not available.")
-        return
-    end
+    assert(client, "Error to get the server status. Client not available")
     local bufnr = vim.api.nvim_get_current_buf()
     local params = vim.lsp.util.make_text_document_params(bufnr)
     local method, command = "workspace/executeCommand", "_ltex.getServerStatus"
     return client.request_sync(method, { command = command, arguments = params }, nil, bufnr)
 end
 
-function ltex_extra_api.get_ltex_client()
-    return LtexExtra:GetLtexClient()
-end
-
 function ltex_extra_api.get_opts()
     return LtexExtra.opts
 end
-
-function ltex_extra_api.__debug_inspect_capabilities()
-    local client = LtexExtra:GetLtexClient()
-    assert(client ~= nil, "Client not available")
-    local capabilities = {
-        client = client.capabilities,
-        server = client.server_capabilities,
-        dynamic = client.dynamic_capabilities
-    }
-    return capabilities
-end
-
-function ltex_extra_api.__debug_inspect_client_settings()
-    local client = LtexExtra:GetLtexClient()
-    assert(client ~= nil and client ~= nil, "Client not available")
-    return client.settings
-end
-
-function ltex_extra_api.__debug_reset()
-    require("plenary.reload").reload_module("ltex_extra")
-    require("plenary.reload").reload_module("plenary.log")
-end
-
-vim.api.nvim_create_user_command("LtexExtraTest", function() end, {})
 
 ---@param type "dictionary"| "disabledRules"| "hiddenFalsePositives",
 ---@param lang language
@@ -276,8 +206,11 @@ function ltex_extra_api.push_setting(type, lang, content)
     LtexExtra:SetLtexSettings(settings)
 end
 
-function ltex_extra_api.request_sync()
-    return LtexExtra:GetLtexSettings()
+function ltex_extra_api.__debug_reset()
+    require("plenary.reload").reload_module("ltex_extra")
+    require("plenary.reload").reload_module("plenary.log")
 end
+
+vim.api.nvim_create_user_command("LtexExtraTest", function() end, {})
 
 return ltex_extra_api

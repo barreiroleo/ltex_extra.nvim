@@ -16,18 +16,6 @@ local exportFile = require("ltex_extra.utils.fs").exportFile
 
 local M = {}
 
----@param langs language[]
-function M.reload(langs)
-    log.trace("updateConfigFull")
-    langs = langs or ltex_extra_api.get_opts().load_langs
-    for _, lang in pairs(langs) do
-        log.trace(string.format("Loading %s", lang))
-        vim.schedule(function()
-            ltex_extra_api.request_sync()
-        end)
-    end
-end
-
 ---@param command  AddToDictionaryCommandParams
 function M.addToDictionary(command)
     log.trace("addToDictionary")
