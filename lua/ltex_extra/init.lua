@@ -101,12 +101,13 @@ function LtexExtra:SyncInternalState()
     return client.notify("workspace/didChangeConfiguration", LtexExtra:GetLtexSettings())
 end
 
---return LtexClientSettings
-function LtexExtra:GetSettingsFromFile()
+---@param langs? language[]
+---@return LtexClientSettings
+function LtexExtra:GetSettingsFromFile(langs)
     local fs_loadFile = require("ltex_extra.utils.fs").loadFile
     ---@type LtexClientSettings
     local settings = { ltex = { dictionary = {}, disabledRules = {}, hiddenFalsePositives = {} } }
-    for _, lang in pairs(LtexExtra.opts.load_langs) do
+    for _, lang in pairs(langs or LtexExtra.opts.load_langs) do
         settings.ltex.dictionary[lang] = fs_loadFile("dictionary", lang)
         settings.ltex.disabledRules[lang] = fs_loadFile("disabledRules", lang)
         settings.ltex.hiddenFalsePositives[lang] = fs_loadFile("hiddenFalsePositives", lang)
@@ -114,7 +115,6 @@ function LtexExtra:GetSettingsFromFile()
     return settings
 end
 
---TODO: Evaluate if we need to listen the LspDetach event
 function LtexExtra:ListenLtexAttach()
     vim.api.nvim_create_autocmd("LspAttach", {
         group = LtexExtra.augroup_id,
@@ -138,8 +138,7 @@ function LtexExtra:RegisterAutocommands()
         if vim.tbl_isempty(langs) then
             langs = LtexExtra.opts.load_langs
         end
-        LoggerBuilder.log.info(string.format("LtexExtraReload: Reloading %s ", vim.inspect(langs)))
-        ltex_extra_api.reload()
+        ltex_extra_api.reload(langs)
     end, {
         nargs = "*",
         complete = function()
@@ -168,8 +167,10 @@ function ltex_extra_api.setup(opts)
     return true
 end
 
-function ltex_extra_api.reload()
-    assert(nil, "Pending implementation")
+---@param langs? language[]
+function ltex_extra_api.reload(langs)
+    local settings = LtexExtra:GetSettingsFromFile(langs)
+    LtexExtra:SetLtexSettings(settings)
 end
 
 ---@return { err: lsp.ResponseError|nil, result: any }|nil
