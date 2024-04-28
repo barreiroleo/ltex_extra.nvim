@@ -3,9 +3,14 @@
 ---@field log_level LogLevel
 ---@field path string Path to store dictionaries. Relative to CWD or absolute
 
+---@deprecated
+---@alias server_start boolean
+---@deprecated
+---@alias server_opts LSPServerOpts|nil
+---
 ---@class Legacy_LtexExtraOpts: LtexExtraOpts
 ---@field init_check boolean Perform a scan inmediatelly after load the dictionaries
----@field server_start boolean Enable the call to ltex. Usefull for migration and test
+---@field server_start server_start Enable the call to ltex. Usefull for migration and test
 ---@field server_opts LSPServerOpts|nil
 
 
@@ -28,7 +33,7 @@ local legacy_opts = {
     log_level = "none",
     path = "",
     ---@deprecated
-    server_start = true,
+    server_start = false,
     ---@deprecated
     server_opts = nil,
 }

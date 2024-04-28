@@ -131,16 +131,45 @@ function LtexExtra:RegisterClientMethods()
     vim.lsp.commands["_ltex.disableRules"] = require("ltex_extra.commands-lsp").disableRules
 end
 
+---@param opts Legacy_LtexExtraOpts
+function LtexExtra:CheckLegacyOpts(opts)
+    local deprecated_in_use = {}
+    if opts.server_start then
+        table.insert(deprecated_in_use, "server_start")
+    end
+    if opts.server_opts then
+        table.insert(deprecated_in_use, "server_opts")
+    end
+    for _, opt in pairs(deprecated_in_use) do
+        vim.notify(string.format("[LtexExtra] %s will be deprecatd soon. Please consider updating your settings." ..
+            " Raise an issue at github.com/barreiroleo/ltex_extra.nvim if you have any concerns.", opt),
+            vim.log.levels.WARN)
+    end
+end
+
+---@deprecated
+---@param opts LSPServerOpts
+function LtexExtra:CallLtexServer(opts)
+    local ok, lspconfig = pcall(require, "lspconfig")
+    if not ok then
+        error("[LtexExtra] Cannot initialize ltex server. Lspconfig not found")
+    end
+    lspconfig["ltex"].setup(opts)
+end
+
 function ltex_extra_api.setup(opts)
     opts = vim.tbl_deep_extend("force", legacy_opts, opts or {})
     opts.path = vim.fs.normalize(opts.path)
     -- Initialize the logger
     LoggerBuilder:new({ logLevel = opts.log_level, usePlenary = true })
     LtexExtra:new(opts)
-    -- Create LtexExtra commands
     LtexExtra:RegisterAutocommands()
-    -- Register client side commands
     LtexExtra:RegisterClientMethods()
+    -- Legacy support for server start. Deprecated soon.
+    if opts.server_start and opts.server_opts then
+        LtexExtra:CallLtexServer(opts.server_opts)
+    end
+    vim.schedule(function() LtexExtra:CheckLegacyOpts(opts) end)
     return true
 end
 
