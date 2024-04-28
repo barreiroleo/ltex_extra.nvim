@@ -13,7 +13,6 @@ local log = require("ltex_extra.utils.log").log
 local ltex_extra_api = require("ltex_extra")
 
 local exportFile = require("ltex_extra.utils.fs").exportFile
-local loadFile = require("ltex_extra.utils.fs").loadFile
 
 local types = {
     ["dict"] = "dictionary",
@@ -22,8 +21,7 @@ local types = {
 }
 
 ---@param client vim.lsp.Client
----@param lang language
-local function update_dictionary(client, lang)
+local function update_dictionary(client)
     log.trace("update_dictionary")
     local settings = ltex_extra_api.get_ltex_client().settings
     settings.ltex = ltex_extra_api.get_internal_settings().ltex
@@ -31,42 +29,33 @@ local function update_dictionary(client, lang)
 end
 
 ---@param client vim.lsp.Client
----@param lang language
-local function update_disabledRules(client, lang)
+local function update_disabledRules(client)
     log.trace("update_disabledRules")
     local settings = ltex_extra_api.get_ltex_client().settings
-    if not settings.ltex.disabledRules then
-        settings.ltex.disabledRules = {}
-    end
-    settings.ltex.disabledRules[lang] = loadFile(types.dRules, lang)
-    return client.notify("workspace/didChangeConfiguration", settings)
+    settings.ltex = ltex_extra_api.get_internal_settings().ltex
+    return client.notify("workspace/didChangeConfiguration", ltex_extra_api.get_internal_settings())
 end
 
 ---@param client vim.lsp.Client
----@param lang language
-local function update_hiddenFalsePositive(client, lang)
+local function update_hiddenFalsePositive(client)
     log.trace("update_hiddenFalsePositive")
     local settings = ltex_extra_api.get_ltex_client().settings
-    if not settings.ltex.hiddenFalsePositives then
-        settings.ltex.hiddenFalsePositives = {}
-    end
-    settings.ltex.hiddenFalsePositives[lang] = loadFile(types.hRules, lang)
-    log.debug(vim.inspect(settings.ltex.hiddenFalsePositives))
-    return client.notify("workspace/didChangeConfiguration", settings)
+    settings.ltex = ltex_extra_api.get_internal_settings().ltex
+    return client.notify("workspace/didChangeConfiguration", ltex_extra_api.get_internal_settings())
 end
 
 local M = {}
 
-function M.updateConfig(configtype, lang)
+function M.updateConfig(configtype)
     log.trace("updateConfig")
     local client = ltex_extra_api.get_ltex_client()
     if client then
         if configtype == types.dict then
-            update_dictionary(client, lang)
+            update_dictionary(client)
         elseif configtype == types.dRules then
-            update_disabledRules(client, lang)
+            update_disabledRules(client)
         elseif configtype == types.hRules then
-            update_hiddenFalsePositive(client, lang)
+            update_hiddenFalsePositive(client)
         else
             return log.error("Unknown config type")
         end
@@ -80,12 +69,11 @@ function M.reload(langs)
     log.trace("updateConfigFull")
     langs = langs or ltex_extra_api.get_opts().load_langs
     for _, lang in pairs(langs) do
-        -- lang = string.lower(lang)
         log.trace(string.format("Loading %s", lang))
         vim.schedule(function()
-            M.updateConfig(types.dict, lang)
-            M.updateConfig(types.dRules, lang)
-            M.updateConfig(types.hRules, lang)
+            M.updateConfig(types.dict)
+            M.updateConfig(types.dRules)
+            M.updateConfig(types.hRules)
         end)
     end
 end
@@ -112,8 +100,7 @@ function M.disableRules(command)
         log.debug(string.format("Lang: %s Rules: %s", vim.inspect(lang), vim.inspect(rules)))
         exportFile(types.dRules, lang, rules)
         vim.schedule(function()
-            M.updateConfig(types.hRules, lang)
-            ltex_extra_api.push_setting(types.hRules, lang, rules)
+            ltex_extra_api.push_setting(types.dRules, lang, rules)
         end)
     end
 end
@@ -127,11 +114,8 @@ function M.hideFalsePositives(command)
         exportFile(types.hRules, lang, rules)
         vim.schedule(function()
             ltex_extra_api.push_setting(types.hRules, lang, rules)
-            M.updateConfig(types.hRules, lang)
         end)
     end
 end
-
--- M.hideFalsePositives(require("ltex_extra.test.commands").HideFalsePositives)
 
 return M
