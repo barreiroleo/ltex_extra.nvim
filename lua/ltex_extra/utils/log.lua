@@ -7,12 +7,12 @@
 ---@field fatal fun(...: string)
 
 ---@class LoggerOpts
----@field usePlenary boolean
 ---@field logLevel LogLevel
+---@field _use_plenary boolean
 
 ---@class LoggerBuilder
 ---@field log Logger
----@field usePlenary boolean
+---@field _use_plenary boolean
 ---@field loglevel LogLevel
 
 ---@enum (key) LogLevel
@@ -37,11 +37,10 @@ function LoggerBuilder:new(opts)
     ---@type Logger
     self.log = nil
     ---@type boolean
-    self.usePlenary = opts.usePlenary or false
-    ---@type string
+    self._use_plenary = opts._use_plenary
     self.logLevel = opts.logLevel or "trace"
 
-    if self.usePlenary then
+    if self._use_plenary then
         self.log = self:GetPlenaryLogger(self.logLevel)
     else
         self.log = self:GetVimLogger(self.logLevel)

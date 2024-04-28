@@ -4,16 +4,12 @@
 ---@alias server_opts LSPServerOpts|nil
 
 ---@class LtexExtraOpts
+---@field init_check boolean Perform a scan inmediatelly after load the dictionaries
 ---@field load_langs string[] Languages to load. See LTeX definitions
 ---@field log_level LogLevel
 ---@field path string Path to store dictionaries. Relative to CWD or absolute
----@field server_opts server_opts
-
----@class Legacy_LtexExtraOpts: LtexExtraOpts
----@field init_check boolean Perform a scan inmediatelly after load the dictionaries
 ---@field server_start server_start Enable the call to ltex. Usefull for migration and test
----@field server_opts LSPServerOpts|nil
-
+---@field server_opts server_opts
 
 ---@class LSPServerOpts
 ---@field on_attach function(client: any, bufnr: integer)
@@ -27,7 +23,7 @@
 ---@field language string
 ---@field additionalRules table {enablePickyRules: boolean, motherTongue: string}
 
----@type Legacy_LtexExtraOpts
+---@type LtexExtraOpts
 local legacy_opts = {
     ---@deprecated
     init_check = true,
@@ -38,9 +34,10 @@ local legacy_opts = {
     server_start = false,
     ---@deprecated
     server_opts = nil,
+    _use_plenary = false
 }
 
----@type Legacy_LtexExtraOpts
+---@type LtexExtraOpts
 local tests_opts = {
     init_check = true,
     load_langs = { "es-AR", "en-US" },

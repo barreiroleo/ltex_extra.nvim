@@ -1,5 +1,5 @@
 local LoggerBuilder = require("ltex_extra.utils.log")
-local legacy_opts = require("ltex_extra.opts").legacy_def_opts
+local def_opts = require("ltex_extra.opts").legacy_def_opts
 
 ---@alias LtexClientSettings {ltex: {dictionary: content, hiddenFalsePositives: content, disabledRules: content }}
 ---@alias content {[string]: string[]}
@@ -131,7 +131,7 @@ function LtexExtra:RegisterClientMethods()
     vim.lsp.commands["_ltex.disableRules"] = require("ltex_extra.commands-lsp").disableRules
 end
 
----@param opts Legacy_LtexExtraOpts
+---@param opts LtexExtraOpts
 function LtexExtra:CheckLegacyOpts(opts)
     local deprecated_in_use = {}
     if opts.server_start then
@@ -158,10 +158,10 @@ function LtexExtra:CallLtexServer(opts)
 end
 
 function ltex_extra_api.setup(opts)
-    opts = vim.tbl_deep_extend("force", legacy_opts, opts or {})
+    opts = vim.tbl_deep_extend("force", def_opts, opts or {})
     opts.path = vim.fs.normalize(opts.path)
     -- Initialize the logger
-    LoggerBuilder:new({ logLevel = opts.log_level, usePlenary = true })
+    LoggerBuilder:new({ logLevel = opts.log_level, _use_plenary = opts._use_plenary })
     LtexExtra:new(opts)
     LtexExtra:RegisterAutocommands()
     LtexExtra:RegisterClientMethods()
