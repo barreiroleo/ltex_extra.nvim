@@ -31,7 +31,7 @@ local legacy_opts = {
     init_check = true,
     load_langs = { "en-US" },
     log_level = "none",
-    path = "",
+    path = ".ltex",
     ---@deprecated
     server_start = false,
     ---@deprecated

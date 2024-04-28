@@ -19,7 +19,7 @@ local LtexExtra = {}
 ---@field reload fun(...)
 ---@field check_document fun()
 ---@field get_server_status fun(): { err: lsp.ResponseError|nil, result: any }|nil
----@field get_opts fun(): LtexExtraOpts
+---@field __get_opts fun(): LtexExtraOpts
 local ltex_extra_api = {}
 
 ---@param opts LtexExtraOpts
@@ -198,10 +198,6 @@ function ltex_extra_api.get_server_status()
     return client.request_sync(method, { command = command, arguments = params }, nil, bufnr)
 end
 
-function ltex_extra_api.get_opts()
-    return LtexExtra.opts
-end
-
 ---@param type "dictionary"| "disabledRules"| "hiddenFalsePositives",
 ---@param lang language
 ---@param content string[]
@@ -213,11 +209,13 @@ function ltex_extra_api.push_setting(type, lang, content)
     LtexExtra:SetLtexSettings(settings)
 end
 
+function ltex_extra_api.__get_opts()
+    return LtexExtra.opts
+end
+
 function ltex_extra_api.__debug_reset()
     require("plenary.reload").reload_module("ltex_extra")
     require("plenary.reload").reload_module("plenary.log")
 end
-
-vim.api.nvim_create_user_command("LtexExtraTest", function() end, {})
 
 return ltex_extra_api

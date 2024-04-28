@@ -4,8 +4,8 @@
 
 # LTeX_extra.nvim
 
-<h6>Provides implementations for non-LSP LTeX commands.</h6>
-<h6>Developed and tested in Nightly. It's not required for you</h6>
+<h6>Provides the client implementation for LTeX commands.</h6>
+<h6>Developed and tested in Nightly. It shouldn't be a requirement for you</h6>
 
 [![Lua](https://img.shields.io/badge/Lua-blue.svg?style=for-the-badge&logo=lua)](http://www.lua.org)
 ![Work In Progress](https://img.shields.io/badge/Work%20In%20Progress-orange?style=for-the-badge)
@@ -13,12 +13,8 @@
 <!-- [![Neovim Nightly](https://img.shields.io/badge/Neovim%20Nightly-green.svg?style=for-the-badge&logo=neovim)](https://neovim.io) -->
 </div>
 
-`LTeX` language server provides some code actions off the LSP specifications.
-These commands require client implementations for things like file system
-operations.
-
-`LTeX_extra` is a companion plugin for `LTeX` language server that provides
-such implementations for Neovim. The current supported methods are:
+`Ltex_extra` is a companion plugin for `LTeX` language server that provides the client handlers for
+these methods that are off the LSP specification. The current supported methods are:
 [`addToDictionary`](https://valentjn.github.io/ltex/ltex-ls/server-usage.html#_ltexhidefalsepositives-client),
 [`disableRule`](https://valentjn.github.io/ltex/ltex-ls/server-usage.html#_ltexdisablerules-client),
 [`hideFalsePositive`](https://valentjn.github.io/ltex/ltex-ls/server-usage.html#_ltexaddtodictionary-client).
@@ -27,133 +23,96 @@ such implementations for Neovim. The current supported methods are:
 <!--toc:start-->
 - [LTeX_extra.nvim](#ltexextranvim)
   - [Features](#features)
-    - [Code Actions](#code-actions)
-    - [Custom export path](#custom-export-path)
-    - [On start load](#on-start-load)
-  - [Installation](#installation)
-  - [Configuration](#configuration)
+  - [Installation and setup](#installation-and-setup)
+  - [Deprecated options notes](#deprecated-options-notes)
   - [FAQ](#faq)
-    - [Force reload](#force-reload)
     - [Lspsaga:](#lspsaga)
   - [Contributors](#contributors)
 <!--toc:end-->
 
 
 ## Features
-> [!WARNING]
-> The following demos may contain orthographic horrors.
 
-### Code Actions
-**Add *word* to dictionary**, **Hide false positive**, and **Disable rule**
+- Code actions: Provides the client handlers to manage the `Add To Dictionary`, `Hide False
+Positive`, and `Disable Rule` commands and be able to persist those settings on disk.
+- Custom export path: This plugin aims to be compatible with the official `vscode` extension, but if
+you point `Ltex_extra` to where your files are, it will use them. Useful if you want to use global
+like setting cross projects.
+- On start load: `Ltex_extra` by default will listen when you start the server and will load the
+settings from disk.
+- `Ltex_extra` API (available on `require("ltex_extra")`):
+    - `ltex_extra.setup(opts)`: The setup entry point.
+    - `ltex_extra.reload(langs[]?)`: Force to reload words/rules for certain languages. If none,
+    it'll reload all ones. Useful when you modified these files by hand.
+    - `ltex_extra.check_document()`: Explicitly request to `ltex` to check the current document.
+    Normally not needed, but there is.
+    - `ltex_extra.get_server_status()`: Expose the internal stats of the server, like CPU, memory
+    and uptime.
+    - `ltex_extra.push_setting(type: "dictionary"|"disabledRules"|"hiddenFalsePositives", lang:
+    string, content: string[])`: Push words/rules to the server but don't persist on disk.
+- `:LtexExtraReload lang[s]?` CmdLine command. Executes the `ltex_extra.reload`, it'll suggest your
+loaded to avoid mismatches.
 
-https://user-images.githubusercontent.com/48270301/177694689-b6b12b4a-3981-47fe-aa88-567697f797bd.mp4
+## Installation and setup
 
-### Custom export path
-Give you compatibility with official vscode extension, and flexibility to do things like global dictionaries.
+`Ltex_extra` requires [`ltex-ls`](https://github.com/valentjn/ltex-ls) available to attach to it.
+The server can be installed through [`mason.nvim`](https://github.com/williamboman/mason.nvim) and
+be configured by [`lspconfig`](https://github.com/neovim/nvim-lspconfig).
 
-https://user-images.githubusercontent.com/48270301/177694714-2f9d7477-26b6-4bf5-a47e-63ce2f82d76a.mp4
-
-### On start load
-Load ltex files on server start.
-
-https://user-images.githubusercontent.com/48270301/177694724-736159ab-c202-4325-ad23-405c76676b79.mp4
-
-
-## Installation
-🚧 This plugin will be rewritten and as consequence I want to support just one
-method to initialize the plugin. The chosen one probably will be based on the
-LspAttach autocommand. I won't support the server initialization through
-this plugin anymore. It was a bad decision, doesn't provide much value and is
-hard to maintain.
-
-This plugin requires an instance of `ltex_ls` language server available to attach.
-*[`ltex-ls`](https://github.com/valentjn/ltex-ls) is available at [`mason.nvim`](https://github.com/williamboman/mason.nvim).*
-
-Install the plugin with your favorite plugin manager using `{"barreiroleo/ltex-extra.nvim"}`.
-Then add `require("ltex_extra").setup()` to your config in a proper place.
-
-We suggest to you two ways:
-- Call the `setup` from `on_attach` function of your server. Example with
-`lspconfig`, minor changes are required for `mason` handler:
-    ```lua
-    require("lspconfig").ltex.setup {
-        capabilities = your_capabilities,
-        on_attach = function(client, bufnr)
-            -- rest of your on_attach process.
-            require("ltex_extra").setup { your_opts }
-        end,
-        settings = {
-            ltex = { your settings }
-        }
-    }
-    ```
-- Use the handler which `ltex_extra` provide to call the server. Example of use with `lazy.nvim`:
-
-    ```lua
-    return {
-        "barreiroleo/ltex_extra.nvim",
-        ft = { "markdown", "tex" },
-        dependencies = { "neovim/nvim-lspconfig" },
-        -- yes, you can use the opts field, just I'm showing the setup explicitly
-        config = function()
-            require("ltex_extra").setup {
-                your_ltex_extra_opts,
-                server_opts = {
-                    capabilities = your_capabilities,
-                    on_attach = function(client, bufnr)
-                        -- your on_attach process
-                    end,
-                    settings = {
-                        ltex = { your settings }
-                    }
-                },
-            }
-        end
-    }
-    ```
-
-## Configuration
-
-Here are the settings available on `ltex_extra`. You don't need explicit define each
-one, just modify what you need.
-
-*Notes: You can pass to set up only the arguments that you are interested in.
-At the moment, if you define stuff in `dictionary`, `disabledRules` and
-`hiddenFalsePositives` in your `ltex` settings, they haven't backup.*
+To install the plugin just use your favorite plugin manager as always. The plugin comes with the
+following defaults: *example using [`lazy.nvim`](https://github.com/folke/lazy.nvim) as package
+manager*:
 
 ```lua
-require("ltex_extra").setup {
-    -- table <string> : languages for witch dictionaries will be loaded, e.g. { "es-AR", "en-US" }
-    -- https://valentjn.github.io/ltex/supported-languages.html#natural-languages
-    load_langs = { "en-US" } -- en-US as default
-    -- boolean : whether to load dictionaries on startup
-    init_check = true,
-    -- string : relative or absolute path to store dictionaries
-    -- e.g. subfolder in the project root or the current working directory: ".ltex"
-    -- e.g. shared files for all projects:  vim.fn.expand("~") .. "/.local/share/ltex"
-    path = "", -- project root or current working directory
-    -- string : "none", "trace", "debug", "info", "warn", "error", "fatal"
-    log_level = "none",
-    -- table : configurations of the ltex language server.
-    -- Only if you are calling the server from ltex_extra
-    server_opts = nil
+{
+    "barreiroleo/ltex_extra.nvim",
+    ft = { "markdown", "tex" },
+    opts = {
+        ---@type string[]
+        -- See https://valentjn.github.io/ltex/supported-languages.html#natural-languages
+        load_langs = { 'en-US' },
+        ---@type "none" | "fatal" | "error" | "warn" | "info" | "debug" | "trace"
+        log_level = "none",
+        ---@type string File's path to load.
+        -- The setup will normalice it running vim.fs.normalize(path).
+        -- e.g. subfolder in project root or cwd: ".ltex"
+        -- e.g. cross project settings:  vim.fn.expand("~") .. "/.local/share/ltex"
+        path = ".ltex",
+        ---@deprecated
+        init_check = true,
+        ---@deprecated
+        server_start = false,
+        ---@deprecated
+        server_opts = nil
+    },
 }
 ```
 
-## FAQ
-### Force reload
-If you experiment some hangs with the server/plugin, you can force a reload of
-the LTeX files by running `require("ltex_extra").reload()`
+## Deprecated options notes
 
-https://user-images.githubusercontent.com/48270301/177694740-bc8bdb4c-0f6b-4f63-98af-54ec23196f27.mp4
+All the options marked as deprecated will continue working until a couple of weeks after nvim's 0.10
+release. Please, if you have any concerns, raise an issue and let's talk about it.
+
+- `init_check`: Not needed anymore. It won't take any effect. `Ltex_extra` by default listen the
+`LspAttach` event and loads the settings from disk. Just remove it safely.
+- `server_start` and `server_opts`: The ability to call the `lspconfig` and start the server for you
+will be removed. When I accepted this PR it made sense to me because the servers setups weren't
+likely standard. When `lazy.nvim` came to the party, configs start being simplified, and now we have
+the `LspAttach` event that simplifies the things much more. Keeping this feature doesn't make much
+sense to me anymore and is hard to test because I need to have an A/B setup in my dotfiles.
+
+## FAQ
 
 ### Lspsaga:
-Some users of lspsaga has reported issues with code actions. I not use lspsaga,
-so PRs are very welcome. Just make sure to test without that plugin enabled as well.
+> [!WARNING]
+> After the plugin rewrite the client management was changed. Need to test if this still happening.
+
+Some users of `lspsaga` has reported issues with code actions. I not use `lspsaga`, so PRs are very
+welcome.
 
 https://user-images.githubusercontent.com/39244876/201530888-077e76ad-211c-408f-80dc-89ba59751532.mov
 
-_Thanks to @felipejoribeiro for the screenrecording_
+_Thanks to @felipejoribeiro for the screen recording_
 
 
 ## Contributors
@@ -163,3 +122,6 @@ Thanks to these people for your time, effort and ideas.
 <a href="https://github.com/barreiroleo/ltex_extra.nvim/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=barreiroleo/ltex_extra.nvim" />
 </a>
+
+
+<!-- vim: set textwidth=100 nospell :-->

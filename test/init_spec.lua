@@ -13,7 +13,7 @@ describe("Setup and API:", function()
 
     it("Get opts", function()
         require("ltex_extra").setup(def_opts)
-        local opts = require("ltex_extra").get_opts()
+        local opts = require("ltex_extra").__get_opts()
         assert(opts ~= nil, "Cannot reach the ltex opts")
     end)
 
