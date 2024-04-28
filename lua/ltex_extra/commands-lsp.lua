@@ -21,24 +21,8 @@ local types = {
 }
 
 ---@param client vim.lsp.Client
-local function update_dictionary(client)
+local function update_settings(client)
     log.trace("update_dictionary")
-    local settings = ltex_extra_api.get_ltex_client().settings
-    settings.ltex = ltex_extra_api.get_internal_settings().ltex
-    return client.notify("workspace/didChangeConfiguration", ltex_extra_api.get_internal_settings())
-end
-
----@param client vim.lsp.Client
-local function update_disabledRules(client)
-    log.trace("update_disabledRules")
-    local settings = ltex_extra_api.get_ltex_client().settings
-    settings.ltex = ltex_extra_api.get_internal_settings().ltex
-    return client.notify("workspace/didChangeConfiguration", ltex_extra_api.get_internal_settings())
-end
-
----@param client vim.lsp.Client
-local function update_hiddenFalsePositive(client)
-    log.trace("update_hiddenFalsePositive")
     local settings = ltex_extra_api.get_ltex_client().settings
     settings.ltex = ltex_extra_api.get_internal_settings().ltex
     return client.notify("workspace/didChangeConfiguration", ltex_extra_api.get_internal_settings())
@@ -46,19 +30,11 @@ end
 
 local M = {}
 
-function M.updateConfig(configtype)
+function M.updateConfig()
     log.trace("updateConfig")
     local client = ltex_extra_api.get_ltex_client()
     if client then
-        if configtype == types.dict then
-            update_dictionary(client)
-        elseif configtype == types.dRules then
-            update_disabledRules(client)
-        elseif configtype == types.hRules then
-            update_hiddenFalsePositive(client)
-        else
-            return log.error("Unknown config type")
-        end
+        update_settings(client)
     else
         return error("Error catching ltex client", 1)
     end
@@ -71,9 +47,7 @@ function M.reload(langs)
     for _, lang in pairs(langs) do
         log.trace(string.format("Loading %s", lang))
         vim.schedule(function()
-            M.updateConfig(types.dict)
-            M.updateConfig(types.dRules)
-            M.updateConfig(types.hRules)
+            M.updateConfig()
         end)
     end
 end
@@ -87,7 +61,6 @@ function M.addToDictionary(command)
         exportFile(types.dict, lang, words)
         vim.schedule(function()
             ltex_extra_api.push_setting(types.dict, lang, words)
-            -- M.updateConfig(types.dict, lang)
         end)
     end
 end
