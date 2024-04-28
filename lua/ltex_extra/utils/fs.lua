@@ -1,5 +1,6 @@
 local log = require("ltex_extra.utils.log").log
 local config_path = require("ltex_extra").__get_opts().path
+local server_opts = require("ltex_extra").__get_opts().server_opts
 local uv = vim.loop
 
 local M = {}
@@ -18,10 +19,7 @@ M.path = function()
         return config_path .. "/"
     end
 
-    -- TODO: Get the root_dir from ltex client when do the setup
-    -- local server_opts = require("ltex_extra").__get_opts().server_opts
-    -- local root_dir = server_opts and server_opts.root_dir or uv.cwd()
-    local root_dir = uv.cwd()
+    local root_dir = server_opts and server_opts.root_dir or uv.cwd()
 
     -- Assume relative path and append to the root dir.
     return vim.fs.normalize(root_dir .. "/" .. config_path) .. "/"

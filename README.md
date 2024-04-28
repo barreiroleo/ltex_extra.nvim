@@ -66,6 +66,7 @@ manager*:
 ```lua
 {
     "barreiroleo/ltex_extra.nvim",
+    branch = "dev",
     ft = { "markdown", "tex" },
     opts = {
         ---@type string[]
@@ -88,18 +89,82 @@ manager*:
 }
 ```
 
-## Deprecated options notes
+## Deprecations
 
-All the options marked as deprecated will continue working until a couple of weeks after nvim's 0.10
-release. Please, if you have any concerns, raise an issue and let's talk about it.
+The following options are now marked deprecated and will be removed from `master` branch in a future
+release after the Nvim 0.10 release. Please, if you have any concerns, raise an issue and let's talk
+about it.
 
 - `init_check`: Not needed anymore. It won't take any effect. `Ltex_extra` by default listen the
-`LspAttach` event and loads the settings from disk. Just remove it safely.
-- `server_start` and `server_opts`: The ability to call the `lspconfig` and start the server for you
-will be removed. When I accepted this PR it made sense to me because the servers setups weren't
-likely standard. When `lazy.nvim` came to the party, configs start being simplified, and now we have
-the `LspAttach` event that simplifies the things much more. Keeping this feature doesn't make much
-sense to me anymore and is hard to test because I need to have an A/B setup in my dotfiles.
+`LspAttach` event and loads the settings from disk.
+
+    How to migrate? Just remove it.
+
+- `server_start` and `server_opts`: When I accepted this PR it made sense to me because the servers
+setups weren't likely standard. When `lazy.nvim` came to the party, configs start being simplified,
+and now we have the `LspAttach` event and that simplifies the things much more. Keeping this feature
+doesn't make much sense to me anymore and is hard to test because I need to have an A/B setup in my
+dotfiles.
+
+    How to migrate? *Setup the `ltex` server as any other.*
+    ```lua
+    {
+        require("lspconfig").ltex.setup({
+            on_attach = function(client, bufnr)
+                -- Setuping the ltex_extra in `on_attach` function is not a requirement anymore.
+                -- require('ltex_extra').setup({})
+            end,
+            filetypes = { 'markdown', 'tex', 'other supported language' },
+            settings = {
+                ltex = {
+                    -- Your Ltex config. For instance:
+                    checkFrequency = 'save',
+                    language = { "en-US", 'es-AR' },
+                    additionalRules = {
+                        enablePickyRules = true,
+                        motherTongue = 'es-AR',
+                    },
+                },
+            },
+        })
+    }
+    ```
+    *And setup the plugin as any other.*
+    ```lua
+    {
+        require("ltex_extra").setup({
+            load_langs = { 'es-AR', 'en-US' }, -- Which languages do you want to load on init.
+            path = ".ltex",                    -- Path to your ltex files
+        })
+    }
+    ```
+- `root_dir`: It was likely unofficial, but if you provide a `root_dir` to the `ltex` client config,
+and you pass the `client.config.root_dir` as a path, `ltex_extra` will use it instead of the
+relative path.
+I think this is a cool feature in some cases but looking back it wasn't good implemented and, to be
+honest, all the acrobatics are not necessary due to you can run the same `root_dir` function inner
+your config and it should be enough.
+
+    How to migrate: Just run your `find_root` method in the config function. Example sing Lazy.
+    ```lua
+    {
+        "barreiroleo/ltex_extra.nvim",
+        config = function()
+            -- Example based on https://github.com/barreiroleo/ltex_extra.nvim/issues/38
+            local function find_root()
+                local file_path = vim.api.nvim_buf_get_name(0)
+                local root_pattern = require("lspconfig").util.root_pattern
+                -- Look for existing `.ltex` directory first. If it doesn't exist,
+                -- look for .git/.hg directories. If everything else fails, get absolute path to the file parent
+                return root_pattern('.ltex', '.hg', '.git')(file_path) or vim.fn.fnamemodify(file_path, ':p:h')
+            end
+            require("ltex_extra").setup({
+                load_langs = { 'es-AR', 'en-US' },
+                path = find_root(),
+            })
+        end
+    }
+    ```
 
 ## FAQ
 

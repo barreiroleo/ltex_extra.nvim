@@ -1,13 +1,14 @@
----@class LtexExtraOpts
----@field load_langs string[] Languages to load. See LTeX definitions
----@field log_level LogLevel
----@field path string Path to store dictionaries. Relative to CWD or absolute
-
 ---@deprecated
 ---@alias server_start boolean
 ---@deprecated
 ---@alias server_opts LSPServerOpts|nil
----
+
+---@class LtexExtraOpts
+---@field load_langs string[] Languages to load. See LTeX definitions
+---@field log_level LogLevel
+---@field path string Path to store dictionaries. Relative to CWD or absolute
+---@field server_opts server_opts
+
 ---@class Legacy_LtexExtraOpts: LtexExtraOpts
 ---@field init_check boolean Perform a scan inmediatelly after load the dictionaries
 ---@field server_start server_start Enable the call to ltex. Usefull for migration and test
@@ -19,6 +20,7 @@
 ---@field capabilities any
 ---@field filetypes string[]
 ---@field settings table {ltex: LtexSettings}
+---@field root_dir any?
 
 ---@class LtexSettings
 ---@field checkFrequency string
