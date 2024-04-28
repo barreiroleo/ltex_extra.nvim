@@ -10,7 +10,6 @@ local legacy_opts = require("ltex_extra.opts").legacy_def_opts
 ---@field opts LtexExtraOpts Full options table
 ---@field augroup_id integer Autocommands group id
 ---@field ltex_client vim.lsp.Client|nil Client attached to Ltex server
----@field task_queue {fun: fun(...), args: any} Task queue for pending task
 ---@field internal_settings LtexClientSettings Internal representation of custom settings.
 local LtexExtra = {}
 
@@ -31,28 +30,9 @@ function LtexExtra:new(opts)
         self.opts = opts
         self.augroup_id = vim.api.nvim_create_augroup("LtexExtra", { clear = false })
         self.ltex_client = self:GetLtexClient()
-        self.task_queue = {}
         self.internal_settings = {}
     end
     return self
-end
-
----@param callback fun(...)
----@param args table{any}
-function LtexExtra:PushTask(callback, args)
-    if LtexExtra.ltex_client then
-        callback(args)
-    else
-        LoggerBuilder.log.trace("Client not running. Queuing the task.")
-        table.insert(LtexExtra.task_queue, { fun = callback, args = args })
-    end
-end
-
-function LtexExtra:ResolvePendingTasks()
-    for _, task in pairs(LtexExtra.task_queue) do
-        LoggerBuilder.log.trace(task)
-        task.fun(task.args)
-    end
 end
 
 ---TODO: Remove get_active_clients when 0.10 is released
@@ -65,9 +45,7 @@ function LtexExtra:GetLtexClient()
         ltex_client = vim.lsp.get_active_clients({ name = 'ltex' })[1]
     end
 
-    if ltex_client then
-        LoggerBuilder.log.debug("Ltex client found at client id " .. ltex_client.id)
-    else
+    if not ltex_client then
         LoggerBuilder.log.info("Ltex client not found. Waiting for attach")
         LtexExtra:ListenLtexAttach()
     end
@@ -77,7 +55,6 @@ end
 ---@param client vim.lsp.Client
 function LtexExtra:SetLtexClient(client)
     LtexExtra.ltex_client = client
-    LtexExtra:ResolvePendingTasks()
     local disk_settings = LtexExtra:GetSettingsFromFile()
     LtexExtra:SetLtexSettings(disk_settings)
 end
