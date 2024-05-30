@@ -1,6 +1,6 @@
 <!-- LTeX: language=en-US -->
 <div align="center">
-<h6>🚧 This plugin will be rewritten, I'll do my best to maintain the specs but expect some changes</h6>
+<h6>🚧 Dev branch will be merged soon. Please take a look at the Deprecations notes in dev branch. </h6>
 
 # LTeX_extra.nvim
 
