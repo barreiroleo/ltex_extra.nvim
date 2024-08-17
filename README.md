@@ -20,9 +20,9 @@ operations.
 
 `LTeX_extra` is a companion plugin for `LTeX` language server that provides
 such implementations for Neovim. The current supported methods are:
-[`addToDictionary`](https://valentjn.github.io/ltex/ltex-ls/server-usage.html#_ltexhidefalsepositives-client),
+[`addToDictionary`](https://valentjn.github.io/ltex/ltex-ls/server-usage.html#_ltexaddtodictionary-client),
 [`disableRule`](https://valentjn.github.io/ltex/ltex-ls/server-usage.html#_ltexdisablerules-client),
-[`hideFalsePositive`](https://valentjn.github.io/ltex/ltex-ls/server-usage.html#_ltexaddtodictionary-client).
+[`hideFalsePositive`](https://valentjn.github.io/ltex/ltex-ls/server-usage.html#_ltexhidefalsepositives-client).
 
 <!--toc:start-->
 
