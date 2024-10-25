@@ -158,6 +158,14 @@ function LtexExtra:CallLtexServer(opts)
 end
 
 function ltex_extra_api.setup(opts)
+    if vim.g.loaded_ltex_extra then
+        vim.notify("[LtexExtra] on_attach() based setup will be deprecated soon. Please consider updating your settings."
+            .. " Raise an issue at github.com/barreiroleo/ltex_extra.nvim if you have any concerns.",
+            vim.log.levels.WARN)
+        return false
+    end
+    vim.g.loaded_ltex_extra = true
+
     opts = vim.tbl_deep_extend("force", def_opts, opts or {})
     opts.path = vim.fs.normalize(opts.path)
     -- Initialize the logger
