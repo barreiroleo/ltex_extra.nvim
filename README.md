@@ -80,18 +80,20 @@ There are two recommended methods:
 
 1. Call the `setup` from `on_attach` function of your server. Example with
    `lspconfig`, minor changes are required for `mason` handler:
-   `lua
-require("lspconfig").ltex.setup {
-    capabilities = your_capabilities,
-    on_attach = function(client, bufnr)
-        -- rest of your on_attach process.
-        require("ltex_extra").setup { your_opts }
-    end,
-    settings = {
-        ltex = { your settings }
-    }
-}
-`
+
+   ```lua
+   require("lspconfig").ltex.setup {
+      capabilities = your_capabilities,
+      on_attach = function(client, bufnr)
+          -- rest of your on_attach process.
+          require("ltex_extra").setup { your_opts }
+      end,
+      settings = {
+          ltex = { your settings }
+      }
+   }
+   ```
+   
 2. Use the handler which `ltex_extra` provide to call the server. Example of use with `lazy.nvim`:
 
    ```lua
