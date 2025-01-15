@@ -94,7 +94,7 @@ There are two recommended methods:
    }
    ```
    
-3. Use the handler which `ltex_extra` provide to call the server. Example of use with `lazy.nvim`:
+2. Use the handler which `ltex_extra` provide to call the server. Example of use with `lazy.nvim`:
 
    ```lua
    return {
