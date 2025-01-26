@@ -134,15 +134,22 @@ end
 ---@param opts LtexExtraOpts
 function LtexExtra:CheckLegacyOpts(opts)
     local deprecated_in_use = {}
+    if vim.g.loaded_ltex_extra then
+        -- Double setup detected. It's probably comming from a legacy on_attach call.
+        table.insert(deprecated_in_use, "on_attach() based setup")
+    end
+    vim.g.loaded_ltex_extra = true
+
     if opts.server_start then
         table.insert(deprecated_in_use, "server_start")
     end
     if opts.server_opts then
         table.insert(deprecated_in_use, "server_opts")
     end
+
     for _, opt in pairs(deprecated_in_use) do
         vim.notify(string.format("[LtexExtra] %s will be deprecatd soon. Please consider updating your settings." ..
-            " Raise an issue at github.com/barreiroleo/ltex_extra.nvim if you have any concerns.", opt),
+            " Use `legacy` branch or raise an issue at github.com/barreiroleo/ltex_extra.nvim if you have any concerns.", opt),
             vim.log.levels.WARN)
     end
 end
@@ -160,6 +167,7 @@ end
 function ltex_extra_api.setup(opts)
     opts = vim.tbl_deep_extend("force", def_opts, opts or {})
     opts.path = vim.fs.normalize(opts.path)
+    LtexExtra:CheckLegacyOpts(opts)
     -- Initialize the logger
     LoggerBuilder:new({ logLevel = opts.log_level, _use_plenary = opts._use_plenary })
     LtexExtra:new(opts)
@@ -169,7 +177,6 @@ function ltex_extra_api.setup(opts)
     if opts.server_start and opts.server_opts then
         LtexExtra:CallLtexServer(opts.server_opts)
     end
-    vim.schedule(function() LtexExtra:CheckLegacyOpts(opts) end)
     return true
 end
 
