@@ -1,47 +1,31 @@
 #!/usr/bin/env -S nvim -l
+--
+
+vim.keymap.set("n", "gra", vim.lsp.buf.code_action, {})
+vim.keymap.set("n", "]d", vim.diagnostic.goto_next, {})
+vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, {})
 
 local ltex_config = {
     filetypes = { 'bib', 'markdown', 'org', 'plaintex', 'rst', 'rnoweb', 'tex' },
     settings = {
         ltex = {
-            checkFrequency = 'save',
-            language = { "en-US", 'es-AR' },
-            additionalRules = {
-                enablePickyRules = true,
-                motherTongue = 'es-AR',
-            },
+            settings = {
+                checkFrequency = 'save',
+                language = { "en-US", 'es-AR' },
+                additionalRules = {
+                    enablePickyRules = true,
+                    motherTongue = 'es-AR',
+                },
+            }
         },
     }
 }
 
-local ltex_extra_spec = {
-    "barreiroleo/ltex_extra.nvim",
-    dir = "/plugin/",
-    dev = true,
-    opts = {
-        init_check = true,   -- boolean : whether to load dictionaries on startup
-        path = ".ltex",      -- string : path to store dictionaries. Relative path uses current working directory
-        server_start = true, -- boolean : Enable the call to ltex. Usefull for migration and test
-        server_opts = {
-            on_attach = function(client, bufnr)
-                print("Loading ltex from ltex_extra")
-            end,
-            capabilities = {},
-            filetypes = { 'bib', 'markdown', 'org', 'plaintex', 'rst', 'rnoweb', 'tex' },
-            settings = {
-                ltex = {
-                    settings = {
-                        checkFrequency = 'save',
-                        language = { "en-US", 'es-AR' },
-                        additionalRules = {
-                            enablePickyRules = true,
-                            motherTongue = 'es-AR',
-                        },
-                    }
-                },
-            }
-        },
-    },
+local ltex_extra_opts = {
+    init_check = true,    -- boolean : whether to load dictionaries on startup
+    path = ".ltex",       -- string : path to store dictionaries. Relative path uses current working directory
+    server_start = false, -- boolean : Enable the call to ltex. Usefull for migration and test
+    server_opts = ltex_config,
 }
 
 
@@ -50,7 +34,13 @@ load(vim.fn.system("curl -s https://raw.githubusercontent.com/folke/lazy.nvim/ma
 
 require("lazy.minit").repro({
     spec = {
-        { ltex_extra_spec },
+        {
+            "barreiroleo/ltex_extra.nvim",
+            dir = "/plugin/",
+            dev = true,
+            lazy = false
+            -- opts = ltex_extra_opts,
+        },
         {
             "neovim/nvim-lspconfig",
             dependencies = {
@@ -63,7 +53,14 @@ require("lazy.minit").repro({
                     ensure_installed = { "ltex" },
                     handlers = {
                         ["ltex"] = function(server_name)
-                            require("lspconfig")[server_name].setup(ltex_config)
+                            require("lspconfig")[server_name].setup({
+                                filetypes = ltex_config.filetypes,
+                                settings = ltex_config.settings,
+                                on_attach = function()
+                                    print("[Ltex_extra] Loading ltex from lsp_config")
+                                    require("ltex_extra").setup(ltex_extra_opts)
+                                end
+                            })
                         end,
                     }
                 })
