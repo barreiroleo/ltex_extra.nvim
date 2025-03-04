@@ -51,17 +51,19 @@ function M.catch_ltex()
     log.trace("catch_ltex")
     local client_getter = vim.lsp.get_clients and vim.lsp.get_clients or vim.lsp.get_active_clients
 
-    local ok, buf_clients = pcall(client_getter, {
+    local buf_clients = client_getter({
         bufnr = vim.api.nvim_get_current_buf(),
         name = "ltex",
     })
 
-    if not ok then
+    if vim.tbl_isempty(buf_clients) then
         buf_clients = client_getter({
             bufnr = vim.api.nvim_get_current_buf(),
             name = "ltex_plus",
         })
     end
+
+    print(vim.inspect(buf_clients[1]))
 
     return buf_clients[1]
 end
