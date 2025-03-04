@@ -63,8 +63,6 @@ function M.catch_ltex()
         })
     end
 
-    print(vim.inspect(buf_clients[1]))
-
     return buf_clients[1]
 end
 
