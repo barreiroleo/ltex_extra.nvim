@@ -57,7 +57,6 @@ function M.catch_ltex()
     return buf_clients[1]
 end
 
--- Modified updateConfig: if no client is attached, wait for LspAttach
 function M.updateConfig(configtype, lang)
     log.trace("updateConfig")
     local client = M.catch_ltex()
