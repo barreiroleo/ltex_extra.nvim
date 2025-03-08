@@ -79,7 +79,7 @@ function M.updateConfig(configtype, lang)
             once = true,
             callback = function(args)
                 local attached_client = vim.lsp.get_client_by_id(args.data.client_id)
-                if attached_client and attached_client.name == "ltex" then
+                if attached_client and attached_client.name == "ltex_plus" then
                     M.updateConfig(configtype, lang)
                 end
             end,
