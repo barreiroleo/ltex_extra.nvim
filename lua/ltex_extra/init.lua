@@ -28,8 +28,7 @@ function LtexExtra:new(opts)
     if not self.__index then
         self.__index = self
         self.opts = opts
-        self.augroup_id = vim.api.nvim_create_augroup("LtexExtra",
-                                                      {clear = false})
+        self.augroup_id = vim.api.nvim_create_augroup("LtexExtra", { clear = false })
         self.ltex_client = self:GetLtexClient()
         self.internal_settings = {}
     end
@@ -40,19 +39,17 @@ end
 ---@return vim.lsp.Client|nil client Ltex client if found
 function LtexExtra:GetLtexClient()
     local ltex_client = nil
-    local lsp_name = 'ltex'
     if vim.lsp.get_clients then
-        ltex_client = vim.lsp.get_clients({name = lsp_name})[1]
+        ltex_client = vim.lsp.get_clients({ name = 'ltex' })[1]
     else
-        ltex_client = vim.lsp.get_active_clients({name = lsp_name})[1]
+        ltex_client = vim.lsp.get_active_clients({ name = 'ltex' })[1]
     end
 
     if not ltex_client then
-        lsp_name = 'ltex_plus'
         if vim.lsp.get_clients then
-            ltex_client = vim.lsp.get_clients({name = lsp_name})[1]
+            ltex_client = vim.lsp.get_clients({ name = 'ltex_plus' })[1]
         else
-            ltex_client = vim.lsp.get_active_clients({name = lsp_name})[1]
+            ltex_client = vim.lsp.get_active_clients({ name = 'ltex_plus' })[1]
         end
     end
 
@@ -74,19 +71,19 @@ end
 function LtexExtra:SetLtexSettings(settings)
     local client = LtexExtra:GetLtexClient()
     assert(client, "Client not available")
-    LtexExtra.internal_settings = vim.tbl_deep_extend("force", client.settings,
-                                                      settings)
+    LtexExtra.internal_settings = vim.tbl_deep_extend("force", client.settings, settings)
     LtexExtra:SyncInternalState()
 end
 
-function LtexExtra:GetLtexSettings() return LtexExtra.internal_settings end
+function LtexExtra:GetLtexSettings()
+    return LtexExtra.internal_settings
+end
 
 function LtexExtra:SyncInternalState()
     local client = LtexExtra:GetLtexClient()
     assert(client ~= nil, "Error to sync setings. Client not available")
     client.settings.ltex = LtexExtra:GetLtexSettings().ltex
-    return client.notify("workspace/didChangeConfiguration",
-                         LtexExtra:GetLtexSettings())
+    return client.notify("workspace/didChangeConfiguration", LtexExtra:GetLtexSettings())
 end
 
 ---@param langs? language[]
@@ -94,15 +91,11 @@ end
 function LtexExtra:GetSettingsFromFile(langs)
     local fs_loadFile = require("ltex_extra.utils.fs").loadFile
     ---@type LtexClientSettings
-    local settings = {
-        ltex = {dictionary = {}, disabledRules = {}, hiddenFalsePositives = {}}
-    }
+    local settings = { ltex = { dictionary = {}, disabledRules = {}, hiddenFalsePositives = {} } }
     for _, lang in pairs(langs or LtexExtra.opts.load_langs) do
         settings.ltex.dictionary[lang] = fs_loadFile("dictionary", lang)
         settings.ltex.disabledRules[lang] = fs_loadFile("disabledRules", lang)
-        settings.ltex.hiddenFalsePositives[lang] = fs_loadFile(
-                                                       "hiddenFalsePositives",
-                                                       lang)
+        settings.ltex.hiddenFalsePositives[lang] = fs_loadFile("hiddenFalsePositives", lang)
     end
     return settings
 end
@@ -112,16 +105,11 @@ function LtexExtra:ListenLtexAttach()
         group = LtexExtra.augroup_id,
         callback = function(args)
             local client = vim.lsp.get_client_by_id(args.data.client_id)
-            if client ~= nil and client.name == "ltex" or client.name ==
-                "ltex_plus" then
-                vim.defer_fn(function()
-                    LtexExtra:SetLtexClient(client)
-                end, 1000)
-                LoggerBuilder.log.info(string.format(
-                                           "Client %d attached to ltex server",
-                                           client.id))
+            if client ~= nil and (client.name == "ltex" or client.name == "ltex_plus") then
+                vim.defer_fn(function() LtexExtra:SetLtexClient(client) end, 1000)
+                LoggerBuilder.log.info(string.format("Client %d attached to ltex server", client.id))
             end
-        end
+        end,
     })
 end
 
@@ -130,26 +118,25 @@ function LtexExtra:RegisterAutocommands()
         -- local fargs = { '"es-AR"', '"en-US"' }
         local langs = {}
         for _, lang in ipairs(opts.fargs) do
-            for k in string.gmatch(lang, "(%w*-%w*)") do
-                table.insert(langs, k)
-            end
+            for k in string.gmatch(lang, "(%w*-%w*)") do table.insert(langs, k) end
         end
-        if vim.tbl_isempty(langs) then langs = LtexExtra.opts.load_langs end
+        if vim.tbl_isempty(langs) then
+            langs = LtexExtra.opts.load_langs
+        end
         ltex_extra_api.reload(langs)
     end, {
         nargs = "*",
-        complete = function() return LtexExtra.opts.load_langs end
+        complete = function()
+            return LtexExtra.opts.load_langs
+        end
     })
 end
 
 ---@return nil: Register client side commands
 function LtexExtra:RegisterClientMethods()
-    vim.lsp.commands["_ltex.addToDictionary"] = require(
-                                                    "ltex_extra.commands-lsp").addToDictionary
-    vim.lsp.commands["_ltex.hideFalsePositives"] = require(
-                                                       "ltex_extra.commands-lsp").hideFalsePositives
-    vim.lsp.commands["_ltex.disableRules"] =
-        require("ltex_extra.commands-lsp").disableRules
+    vim.lsp.commands["_ltex.addToDictionary"] = require("ltex_extra.commands-lsp").addToDictionary
+    vim.lsp.commands["_ltex.hideFalsePositives"] = require("ltex_extra.commands-lsp").hideFalsePositives
+    vim.lsp.commands["_ltex.disableRules"] = require("ltex_extra.commands-lsp").disableRules
 end
 
 ---@param opts LtexExtraOpts
@@ -161,14 +148,17 @@ function LtexExtra:CheckLegacyOpts(opts)
     end
     vim.g.loaded_ltex_extra = true
 
-    if opts.server_start then table.insert(deprecated_in_use, "server_start") end
-    if opts.server_opts then table.insert(deprecated_in_use, "server_opts") end
+    if opts.server_start then
+        table.insert(deprecated_in_use, "server_start")
+    end
+    if opts.server_opts then
+        table.insert(deprecated_in_use, "server_opts")
+    end
 
     for _, opt in pairs(deprecated_in_use) do
-        vim.notify(string.format(
-                       "[LtexExtra] %s will be deprecatd soon. Please consider updating your settings." ..
-                           " Use `legacy` branch or raise an issue at github.com/barreiroleo/ltex_extra.nvim if you have any concerns.",
-                       opt), vim.log.levels.WARN)
+        vim.notify(string.format("[LtexExtra] %s will be deprecatd soon. Please consider updating your settings." ..
+            " Use `legacy` branch or raise an issue at github.com/barreiroleo/ltex_extra.nvim if you have any concerns.", opt),
+            vim.log.levels.WARN)
     end
 end
 
@@ -187,10 +177,7 @@ function ltex_extra_api.setup(opts)
     opts.path = vim.fs.normalize(opts.path)
     LtexExtra:CheckLegacyOpts(opts)
     -- Initialize the logger
-    LoggerBuilder:new({
-        logLevel = opts.log_level,
-        _use_plenary = opts._use_plenary
-    })
+    LoggerBuilder:new({ logLevel = opts.log_level, _use_plenary = opts._use_plenary })
     LtexExtra:new(opts)
     LtexExtra:RegisterAutocommands()
     LtexExtra:RegisterClientMethods()
@@ -214,8 +201,7 @@ function ltex_extra_api.check_document()
     local bufnr = vim.api.nvim_get_current_buf()
     local params = vim.lsp.util.make_text_document_params(bufnr)
     local method, command = "workspace/executeCommand", "_ltex.checkDocument"
-    return client.request_sync(method, {command = command, arguments = params},
-                               nil, bufnr)
+    return client.request_sync(method, { command = command, arguments = params }, nil, bufnr)
 end
 
 function ltex_extra_api.get_server_status()
@@ -224,21 +210,23 @@ function ltex_extra_api.get_server_status()
     local bufnr = vim.api.nvim_get_current_buf()
     local params = vim.lsp.util.make_text_document_params(bufnr)
     local method, command = "workspace/executeCommand", "_ltex.getServerStatus"
-    return client.request_sync(method, {command = command, arguments = params},
-                               nil, bufnr)
+    return client.request_sync(method, { command = command, arguments = params }, nil, bufnr)
 end
 
 ---@param type "dictionary"| "disabledRules"| "hiddenFalsePositives",
 ---@param lang language
 ---@param content string[]
 function ltex_extra_api.push_setting(type, lang, content)
-    local settings = vim.tbl_deep_extend("keep", LtexExtra:GetLtexSettings(),
-                                         {ltex = {[type] = {[lang] = {}}}})
+    local settings = vim.tbl_deep_extend("keep", LtexExtra:GetLtexSettings(), {
+        ltex = { [type] = { [lang] = {} } }
+    })
     vim.list_extend(settings.ltex[type][lang], content)
     LtexExtra:SetLtexSettings(settings)
 end
 
-function ltex_extra_api.__get_opts() return LtexExtra.opts end
+function ltex_extra_api.__get_opts()
+    return LtexExtra.opts
+end
 
 function ltex_extra_api.__debug_reset()
     require("plenary.reload").reload_module("ltex_extra")
