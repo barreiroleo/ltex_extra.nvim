@@ -46,6 +46,14 @@ function LtexExtra:GetLtexClient()
     end
 
     if not ltex_client then
+        if vim.lsp.get_clients then
+            ltex_client = vim.lsp.get_clients({ name = 'ltex_plus' })[1]
+        else
+            ltex_client = vim.lsp.get_active_clients({ name = 'ltex_plus' })[1]
+        end
+    end
+
+    if not ltex_client then
         LoggerBuilder.log.info("Ltex client not found. Waiting for attach")
         LtexExtra:ListenLtexAttach()
     end
@@ -97,7 +105,7 @@ function LtexExtra:ListenLtexAttach()
         group = LtexExtra.augroup_id,
         callback = function(args)
             local client = vim.lsp.get_client_by_id(args.data.client_id)
-            if client ~= nil and client.name == "ltex" then
+            if client ~= nil and (client.name == "ltex" or client.name == "ltex_plus") then
                 vim.defer_fn(function() LtexExtra:SetLtexClient(client) end, 1000)
                 LoggerBuilder.log.info(string.format("Client %d attached to ltex server", client.id))
             end
