@@ -26,7 +26,7 @@ local function update_dictionary(client, lang)
     local settings = get_settings(client)
     settings.ltex.dictionary[lang] = loadFile(types.dict, lang)
     log.debug(vim.inspect(settings.ltex.dictionary))
-    return client.notify("workspace/didChangeConfiguration", settings)
+    return client:notify("workspace/didChangeConfiguration", settings)
 end
 
 local function update_disabledRules(client, lang)
@@ -34,7 +34,7 @@ local function update_disabledRules(client, lang)
     local settings = get_settings(client)
     settings.ltex.disabledRules[lang] = loadFile(types.dRules, lang)
     log.debug(vim.inspect(settings.ltex.disabledRules))
-    return client.notify("workspace/didChangeConfiguration", settings)
+    return client:notify("workspace/didChangeConfiguration", settings)
 end
 
 local function update_hiddenFalsePositive(client, lang)
@@ -42,7 +42,7 @@ local function update_hiddenFalsePositive(client, lang)
     local settings = get_settings(client)
     settings.ltex.hiddenFalsePositives[lang] = loadFile(types.hRules, lang)
     log.debug(vim.inspect(settings.ltex.hiddenFalsePositives))
-    return client.notify("workspace/didChangeConfiguration", settings)
+    return client:notify("workspace/didChangeConfiguration", settings)
 end
 
 local M = {}
