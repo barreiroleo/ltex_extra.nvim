@@ -50,19 +50,10 @@ local M = {}
 function M.catch_ltex()
     log.trace("catch_ltex")
     local client_getter = vim.lsp.get_clients and vim.lsp.get_clients or vim.lsp.get_active_clients
-
     local buf_clients = client_getter({
         bufnr = vim.api.nvim_get_current_buf(),
         name = "ltex",
     })
-
-    if vim.tbl_isempty(buf_clients) then
-        buf_clients = client_getter({
-            bufnr = vim.api.nvim_get_current_buf(),
-            name = "ltex_plus",
-        })
-    end
-
     return buf_clients[1]
 end
 
@@ -81,7 +72,18 @@ function M.updateConfig(configtype, lang)
             return vim.notify("Config type unknown")
         end
     else
-        return error("Error catching ltex client", 1)
+        log.warn(
+            "LTeX client not attached yet. Waiting for LspAttach event to update " .. configtype .. " for lang " .. lang
+        )
+        vim.api.nvim_create_autocmd("LspAttach", {
+            once = true,
+            callback = function(args)
+                local attached_client = vim.lsp.get_client_by_id(args.data.client_id)
+                if attached_client and attached_client.name == "ltex_plus" then
+                    M.updateConfig(configtype, lang)
+                end
+            end,
+        })
     end
 end
 
