@@ -24,7 +24,7 @@ these methods that are off the LSP specification. The current supported methods 
 - [LTeX_extra.nvim](#ltexextranvim)
   - [Features](#features)
   - [Installation and setup](#installation-and-setup)
-  - [Deprecated options notes](#deprecated-options-notes)
+  - [Deprecated options notes](#deprecations)
   - [FAQ](#faq)
     - [Lspsaga:](#lspsaga)
   - [Contributors](#contributors)
@@ -75,7 +75,7 @@ manager*:
         ---@type "none" | "fatal" | "error" | "warn" | "info" | "debug" | "trace"
         log_level = "none",
         ---@type string File's path to load.
-        -- The setup will normalice it running vim.fs.normalize(path).
+        -- The setup will normalize it by running vim.fs.normalize(path).
         -- e.g. subfolder in project root or cwd: ".ltex"
         -- e.g. cross project settings:  vim.fn.expand("~") .. "/.local/share/ltex"
         path = ".ltex",
