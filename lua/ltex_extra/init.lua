@@ -83,7 +83,7 @@ function LtexExtra:SyncInternalState()
     local client = LtexExtra:GetLtexClient()
     assert(client ~= nil, "Error to sync setings. Client not available")
     client.settings.ltex = LtexExtra:GetLtexSettings().ltex
-    return client.notify("workspace/didChangeConfiguration", LtexExtra:GetLtexSettings())
+    return client:notify("workspace/didChangeConfiguration", LtexExtra:GetLtexSettings())
 end
 
 ---@param langs? language[]
